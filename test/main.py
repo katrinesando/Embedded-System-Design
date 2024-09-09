@@ -17,6 +17,7 @@ def wait_for_color(desired_color):
         wait(20)    
 
 
+
 # Create your objects here.
 ev3 = EV3Brick()
 test_motor = Motor(Port.B)

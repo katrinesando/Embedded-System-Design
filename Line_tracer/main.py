@@ -95,20 +95,20 @@ def switch(state):
      if state=="SWITCH_LANE":
           if lane_state=="LEFT_LANE":
                robot.drive(Speed,45)
-               wait(1000)
+               wait(600)
                robot.drive(Speed,0)
                wait(3000)
                robot.drive(Speed,-45)
-               wait(1000)
+               wait(600)
                robot.drive(Speed,0)
                rounds-=1
           elif lane_state=="RIGHT_LANE":
                robot.drive(Speed,-45)
-               wait(1000)
+               wait(600)
                robot.drive(Speed,0)
-               wait(3000)
+               wait(2000)
                robot.drive(Speed,45)
-               wait(1000)
+               wait(600)
                robot.drive(Speed,0)
                rounds-=1
      if state=="HOLD":

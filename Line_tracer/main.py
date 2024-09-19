@@ -68,8 +68,9 @@ def transition_state(color_left, color_right):
           state=STATES[2]
 
      if left_color == Color.RED and right_color == Color.RED:
-          if rounds==0:
+          if rounds<=0:
                state=STATES[1]
+               print(rounds)
           state=STATES[5]
           
      if left_color == Color.BLUE and right_color == Color.BLUE:
@@ -102,6 +103,7 @@ def switch(state):
                wait(600)
                robot.drive(Speed,0)
                rounds-=1
+               print(rounds)
           elif lane_state=="RIGHT_LANE":
                robot.drive(Speed,-45)
                wait(600)
@@ -111,6 +113,7 @@ def switch(state):
                wait(600)
                robot.drive(Speed,0)
                rounds-=1
+               print(rounds)
      if state=="HOLD":
           robot.drive(0,0)
           wait(3000)
@@ -129,7 +132,7 @@ while True:
     wait(10)
     transition_state(left_color, right_color)
     switch(state)
-    print(state)
+   # print(state)
     
 
 

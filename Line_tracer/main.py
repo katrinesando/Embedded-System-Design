@@ -21,7 +21,7 @@ motor_right = Motor(Port.B)
 sensor_left= ColorSensor(Port.S3)
 sensor_right= ColorSensor(Port.S4)
 
-STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD"]
+STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD"]#All possible states the robot can have 
 LANE_STATES=["UNKNOWN","LEFT_LANE","RIGHT_LANE"]
 rounds=1
 state=STATES[1]
@@ -31,13 +31,13 @@ Speed = 50
 # Initialize the drive base.
 robot = DriveBase(motor_left, motor_right, wheel_diameter=55, axle_track=145) #Check for correct Parameter 
 
-def update_sensors():
-    """ Update sensor readings """   
-    color_left = sensor_left.color()
+def update_sensors(): #Update sensor readings
+     color_left = sensor_left.color()
     color_right = sensor_right.color()
     return color_left, color_right
 
-def transition_state(color_left, color_right):
+#function changes state depending of sensor outputs
+def transition_state(color_left, color_right): 
     global state
     global lane_state
     global rounds
@@ -76,7 +76,9 @@ def transition_state(color_left, color_right):
         state=STATES[1]
         lane_state==[0]
 
-def switch(state):
+
+#Executes operations depending of the state 
+def switch(state):  
     global rounds
     if state ==  "DRIVE":
         robot.drive(Speed,0)         
@@ -91,7 +93,7 @@ def switch(state):
     elif state ==  "SWITCH_LANE":
         if lane_state=="LEFT_LANE":
             robot.drive(Speed,45)
-            wait(600)
+            wait(600)# timing needs to be relativ to the speed. (maybe wait(30000/speed)). 30000 is the distance
             robot.drive(Speed,0)
             wait(3000)
             robot.drive(Speed,-45)
@@ -149,6 +151,7 @@ def switch(state):
     #         robot.drive(Speed,0)
     #         wait(1000)
 
+#main loop of the programm
 while True:
     # Update sensor readings
     left_color, right_color = update_sensors()

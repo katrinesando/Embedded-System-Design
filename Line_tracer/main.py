@@ -1,5 +1,5 @@
 #!/usr/bin/env pybricks-micropython
-
+import time
 from pybricks.hubs import EV3Brick
 from pybricks.ev3devices import (Motor, TouchSensor, ColorSensor,
                                  InfraredSensor, UltrasonicSensor, GyroSensor)
@@ -26,7 +26,7 @@ LANE_STATES=["UNKNOWN","LEFT_LANE","RIGHT_LANE"]
 rounds=1
 state=STATES[1]
 lane_state=LANE_STATES[0]
-Speed = 50
+Speed = 100
 
 # Initialize the drive base.
 robot = DriveBase(motor_left, motor_right, wheel_diameter=55, axle_track=145) #Check for correct Parameter 
@@ -61,7 +61,9 @@ def transition_state(color_left, color_right):
         if lane_state==LANE_STATES[0]:
             lane_state=LANE_STATES[2]
         
-    if left_color == Color.YELLOW and right_color == Color.YELLOW:
+    if left_color == Color.YELLOW:  
+        state=STATES[2]
+    if right_color == Color.YELLOW:
         state=STATES[2]
 
     if left_color == Color.RED and right_color == Color.RED:
@@ -86,6 +88,7 @@ def switch(state):
         robot.drive(0,0)
     elif state ==  "SLOW":
         robot.drive(Speed/2,0)
+        wait(1000)
     elif state ==  "TURN_LEFT":
         robot.drive(Speed,-45)
     elif state ==  "TURN_RIGHT":
@@ -95,7 +98,7 @@ def switch(state):
             robot.drive(Speed,45)
             wait(600)# timing needs to be relativ to the speed. (maybe wait(30000/speed)). 30000 is the distance
             robot.drive(Speed,0)
-            wait(3000)
+            wait(1000)
             robot.drive(Speed,-45)
             wait(600)
             robot.drive(Speed,0)
@@ -109,47 +112,14 @@ def switch(state):
             wait(600)
             robot.drive(Speed,0)
             rounds-=1
+        else:
+            print("No lane detected")
+            robot.drive(Speed,45)
     elif state == "HOLD":
         robot.drive(0,0)
         wait(3000)
         robot.drive(Speed,0)
         wait(1000)
-
-    # match state:
-    #     case "DRIVE":
-    #         robot.drive(Speed,0)         
-    #     case "STOP":
-    #         robot.drive(0,0)
-    #     case "SLOW":
-    #         robot.drive(Speed/2,0)
-    #     case "TURN_LEFT":
-    #         robot.drive(Speed,-45)
-    #     case "TURN_RIGHT":
-    #         robot.drive(Speed,45)
-    #     case "SWITCH_LANE":
-    #         if lane_state=="LEFT_LANE":
-    #             robot.drive(Speed,45)
-    #             wait(600)
-    #             robot.drive(Speed,0)
-    #             wait(3000)
-    #             robot.drive(Speed,-45)
-    #             wait(600)
-    #             robot.drive(Speed,0)
-    #             rounds-=1
-    #         elif lane_state=="RIGHT_LANE":
-    #             robot.drive(Speed,-45)
-    #             wait(600)
-    #             robot.drive(Speed,0)
-    #             wait(2000)
-    #             robot.drive(Speed,45)
-    #             wait(600)
-    #             robot.drive(Speed,0)
-    #             rounds-=1
-    #     case "HOLD":
-    #         robot.drive(0,0)
-    #         wait(3000)
-    #         robot.drive(Speed,0)
-    #         wait(1000)
 
 #main loop of the programm
 while True:
@@ -161,7 +131,8 @@ while True:
     wait(10)
     transition_state(left_color, right_color)
     switch(state)
-    print(state)
+    # print(state)
+
     
 
 

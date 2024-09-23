@@ -8,10 +8,6 @@ from pybricks.tools import wait, StopWatch, DataLog
 from pybricks.robotics import DriveBase
 from pybricks.media.ev3dev import SoundFile, ImageFile
 
-
-
-
-
 # This program requires LEGO EV3 MicroPython v2.0 or higher.
 # Click "Open user guide" on the EV3 extension tab for more information.
 
@@ -30,6 +26,7 @@ LANE_STATES=["UNKNOWN","LEFT_LANE","RIGHT_LANE"]
 rounds=1
 state=STATES[1]
 lane_state=LANE_STATES[0]
+Speed = 50
 
 # Initialize the drive base.
 robot = DriveBase(motor_left, motor_right, wheel_diameter=55, axle_track=145) #Check for correct Parameter 
@@ -46,7 +43,7 @@ def transition_state(color_left, color_right):
     global rounds
 
     if left_color == Color.BLACK and right_color == Color.BLACK:
-    state=STATES[0] # Move forward
+        state=STATES[0] # Move forward
 
     if left_color == Color.GREEN:
         state=STATES[4]
@@ -68,7 +65,7 @@ def transition_state(color_left, color_right):
         state=STATES[2]
 
     if left_color == Color.RED and right_color == Color.RED:
-        if rounds==0:
+        if rounds<=0:
             state=STATES[1]
         state=STATES[5]
         
@@ -79,20 +76,19 @@ def transition_state(color_left, color_right):
         state=STATES[1]
         lane_state==[0]
 
-    
-match (state):
+def switch(state):
     global rounds
-    case "DRIVE":
-    case "STOP":
+    if state ==  "DRIVE":
         robot.drive(Speed,0)         
+    elif state ==  "STOP":
         robot.drive(0,0)
-    case "SLOW":
+    elif state ==  "SLOW":
         robot.drive(Speed/2,0)
-    case "TURN_LEFT":
+    elif state ==  "TURN_LEFT":
         robot.drive(Speed,-45)
-    case "TURN_RIGHT":
+    elif state ==  "TURN_RIGHT":
         robot.drive(Speed,45)
-    case "SWITCH_LANE":
+    elif state ==  "SWITCH_LANE":
         if lane_state=="LEFT_LANE":
             robot.drive(Speed,45)
             wait(600)
@@ -111,14 +107,47 @@ match (state):
             wait(600)
             robot.drive(Speed,0)
             rounds-=1
-     case "HOLD":
+    elif state == "HOLD":
         robot.drive(0,0)
         wait(3000)
         robot.drive(Speed,0)
         wait(1000)
 
-
-Speed=50
+    # match state:
+    #     case "DRIVE":
+    #         robot.drive(Speed,0)         
+    #     case "STOP":
+    #         robot.drive(0,0)
+    #     case "SLOW":
+    #         robot.drive(Speed/2,0)
+    #     case "TURN_LEFT":
+    #         robot.drive(Speed,-45)
+    #     case "TURN_RIGHT":
+    #         robot.drive(Speed,45)
+    #     case "SWITCH_LANE":
+    #         if lane_state=="LEFT_LANE":
+    #             robot.drive(Speed,45)
+    #             wait(600)
+    #             robot.drive(Speed,0)
+    #             wait(3000)
+    #             robot.drive(Speed,-45)
+    #             wait(600)
+    #             robot.drive(Speed,0)
+    #             rounds-=1
+    #         elif lane_state=="RIGHT_LANE":
+    #             robot.drive(Speed,-45)
+    #             wait(600)
+    #             robot.drive(Speed,0)
+    #             wait(2000)
+    #             robot.drive(Speed,45)
+    #             wait(600)
+    #             robot.drive(Speed,0)
+    #             rounds-=1
+    #     case "HOLD":
+    #         robot.drive(0,0)
+    #         wait(3000)
+    #         robot.drive(Speed,0)
+    #         wait(1000)
 
 while True:
     # Update sensor readings

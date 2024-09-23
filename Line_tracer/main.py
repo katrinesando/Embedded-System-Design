@@ -32,7 +32,7 @@ Speed = 50
 robot = DriveBase(motor_left, motor_right, wheel_diameter=55, axle_track=145) #Check for correct Parameter 
 
 def update_sensors(): #Update sensor readings
-     color_left = sensor_left.color()
+    color_left = sensor_left.color()
     color_right = sensor_right.color()
     return color_left, color_right
 

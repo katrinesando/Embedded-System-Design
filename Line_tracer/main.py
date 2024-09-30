@@ -6,6 +6,7 @@ from pybricks.ev3devices import (Motor, TouchSensor, ColorSensor,
 from pybricks.parameters import Port, Stop, Direction, Button, Color # type: ignore
 from pybricks.tools import wait, StopWatch, DataLog
 from pybricks.robotics import DriveBase
+from pybricks.iodevices import Ev3devSensor
 from pybricks.media.ev3dev import SoundFile, ImageFile
 
 # This program requires LEGO EV3 MicroPython v2.0 or higher.
@@ -18,8 +19,11 @@ ev3 = EV3Brick()
 # Initialize the motors and sensors.
 motor_left = Motor(Port.C) #Check for correct Port 
 motor_right = Motor(Port.B) 
-sensor_left= ColorSensor(Port.S3)
-sensor_right= ColorSensor(Port.S4)
+sensor_left= Ev3devSensor(Port.S3)
+sensor_right= Ev3devSensor(Port.S4)
+color_list_left = [] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_right = [] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+
 
 STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD"]#All possible states the robot can have 
 LANE_STATES=["UNKNOWN","LEFT_LANE","RIGHT_LANE"]
@@ -28,53 +32,97 @@ state=STATES[1]
 lane_state=LANE_STATES[0]
 Speed = 100
 
-# Initialize the drive base.
+# # Initialize the drive base.
 robot = DriveBase(motor_left, motor_right, wheel_diameter=55, axle_track=145) #Check for correct Parameter 
 
-def update_sensors(): #Update sensor readings
-    color_left = sensor_left.color()
-    color_right = sensor_right.color()
-    return color_left, color_right
+def get_colors():
+    while len(color_list_left) <= 6:
+        with open('color.txt', 'w') as cf:
+        # color_f = open('color.txt', 'w')
+            pressed = ev3.buttons.pressed() 
+            if pressed:
+                color_left = sensor_left.read('RGB-RAW')
+                color_right = sensor_right.read('RGB-RAW')
+                r, g, b = sensor_left.read('RGB-RAW')
+                # r, g, b = sensor_right.read('RGB-RAW')
+                cf.write("hej")
+                # cf.write("{0}{1}{2}\n".format(r, g, b))
+                color_list_left.append(color_left)
+                color_list_right.append(color_right)
+                print('R: {0}\t G: {1}\t B: {2}'.format(r, g, b))
+                wait(500)
+    # while color_sensor.color() in POSSIBLE_COLORS:
+    #         pass
 
-#function changes state depending of sensor outputs
+def update_sensors(): #Update sensor readings
+    r_l,g_l,b_l = sensor_left.read('RGB-RAW')
+    r_r,g_r,b_r = sensor_right.read('RGB-RAW')
+    left = None
+    right = None
+    # color_right = sensor_right.color()
+    for i in color_list_left:
+        print('R: {0}\t G: {1}\t B: {2}'.format(r_l, g_l, b_l))
+        if inrange(r_l,g_l,b_l,i):
+            left = i
+        else:
+            print ("no")
+            left = None
+        wait(200)
+    for i in color_list_right:
+        if inrange(r_r,g_r,b_r,i):
+            right_color = i
+        else:
+            print ("no")
+            right = None
+        wait(200)
+    return left,right
+
+def inrange(r,g,b, color_list):
+    offset = 3
+    if (color_list[0]-offset <= r <= color_list[0]+offset) and (color_list[1]-offset <= g <= color_list[1]+offset )and (color_list[2]-offset <= b <= color_list[2]+offset):
+        return True 
+    return False
+
+
+# #function changes state depending of sensor outputs
 def transition_state(color_left, color_right): 
     global state
     global lane_state
     global rounds
 
-    if left_color == Color.BLACK and right_color == Color.BLACK:
+    if left_color == color_list_left[0] and right_color == color_list_right[0]:#black
         state=STATES[0] # Move forward
 
-    if left_color == Color.GREEN:
+    if left_color == color_list_left[2]:#green
         state=STATES[4]
 
-    if right_color==Color.GREEN:
+    if right_color==color_list_right[2]: #green
         state=STATES[3]
 
-    if left_color == Color.BLACK and right_color == Color.WHITE:
+    if left_color == color_list_left[0] and right_color == color_list_right[1]: #Black / white
         if lane_state==LANE_STATES[0]:
             lane_state=LANE_STATES[1]
         state=STATES[3]
 
-    if left_color == Color.WHITE and right_color == Color.BLACK:
+    if left_color == color_list_left[1] and right_color == color_list_right[0]: # white / black
         state=STATES[4]
         if lane_state==LANE_STATES[0]:
             lane_state=LANE_STATES[2]
         
-    if left_color == Color.YELLOW:  
+    if left_color == color_list_left[4]: # yellow
         state=STATES[2]
-    if right_color == Color.YELLOW:
+    if right_color == color_list_right[4]: # yellow
         state=STATES[2]
 
-    if left_color == Color.RED and right_color == Color.RED:
+    if left_color == color_list_left[5] and right_color == color_list_right[5]: # red
         if rounds<=0:
             state=STATES[1]
         state=STATES[5]
         
-    if left_color == Color.BLUE and right_color == Color.BLUE:
+    if left_color == color_list_left[3] and right_color == color_list_right[3]: # blue
         state=STATES[6]
 
-    if left_color==None and right_color==None:
+    if left_color==None and right_color==None: # none
         state=STATES[1]
         lane_state==[0]
 
@@ -124,6 +172,7 @@ def switch(state):
 #main loop of the programm
 while True:
     # Update sensor readings
+    get_colors()
     left_color, right_color = update_sensors()
     #print(left_color)
     
@@ -137,4 +186,3 @@ while True:
 
 
 # Write your program here.
-ev3.speaker.beep()

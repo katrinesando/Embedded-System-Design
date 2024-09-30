@@ -19,13 +19,18 @@ ev3 = EV3Brick()
 # Initialize the motors and sensors.
 motor_left = Motor(Port.C) #Check for correct Port 
 motor_right = Motor(Port.B) 
-sensor_left= Ev3devSensor(Port.S3)
-sensor_right= Ev3devSensor(Port.S4)
-color_list_left = [] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-color_list_right = [] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+sensor_left= ColorSensor(Port.S3)
+sensor_right= ColorSensor(Port.S4)
+# color_list_left = [] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+# color_list_right = [] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
-# color_list_left = [(),(162,140,107),(),(),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-# color_list_right = [(),(127,209,117),(),(),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+#For papers
+# color_list_left = [(9,9,3),(59,56,76),(18,21,16),(5,10,16),(25,20,1),(31,10,6)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+# color_list_right = [(5,9,2),(43,80,79),(18,43,23),(6,23,29),(28,42,5),(20,10,5)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+
+# For drift lane
+color_list_left = [(12,13,1),(47,42,68),(37,47,33),(10,17,37),(60,56,15),(50,12,4)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_right = [(8,13,1),(41,73,73),(25,58,32),(8,28,39),(36,54,10),(31,13,5)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
 
 STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD"]#All possible states the robot can have 
@@ -43,12 +48,12 @@ robot = DriveBase(motor_left, motor_right, wheel_diameter=55, axle_track=145) #C
 # while True:
 #     if ev3.buttons.pressed() == True:
 #         print ("pressed")
-#     r, g, b = sensor_left.read('RGB-RAW')
-#     color_right = sensor_right.read('RGB-RAW')
+#     r, g, b = sensor_left.rgb()
+#     color_right = sensor_right.rgb()
 #     # Print results
 #     print('R: {0}\t G: {1}\t B: {2}'.format(r, g, b))
 #     print(color_right)
-#     wait(1000)
+#     wait(5000)
 
 
 def get_colors():
@@ -57,13 +62,11 @@ def get_colors():
         # color_f = open('color.txt', 'w')
             pressed = ev3.buttons.pressed() 
             if pressed:
-                color_left = sensor_left.read('RGB-RAW')
+                color_left = sensor_left.rgb()
                 print(color_left)
-                color_right = sensor_right.read('RGB-RAW')
-                r, g, b = sensor_left.read('RGB-RAW')
-                # r, g, b = sensor_right.read('RGB-RAW')
+                color_right = sensor_right.rgb()
+                r, g, b = sensor_left.rgb()
                 cf.write("hej")
-                # cf.write("{0}{1}{2}\n".format(r, g, b))
                 color_list_left.append(color_left)
                 color_list_right.append(color_right)
                 print('R: {0}\t G: {1}\t B: {2}'.format(r, g, b))
@@ -73,26 +76,24 @@ def get_colors():
 
 def update_sensors(): #Update sensor readings
     global right, left
-    r_l,g_l,b_l = sensor_left.read('RGB-RAW')
-    r_r,g_r,b_r = sensor_right.read('RGB-RAW')
+    r_l,g_l,b_l = sensor_left.rgb()
+    r_r,g_r,b_r = sensor_right.rgb()
     print('R: {0}\t G: {1}\t B: {2}'.format(r_l, g_l, b_l))
+    print(sensor_right.rgb())
     # color_right = sensor_right.color()
     for i in color_list_left:
-        if inrange(r_l,g_l,b_l,i):
-            # print("left: ")
+        if inRange(r_l,g_l,b_l,i):
             left = i
 
     for i in color_list_right:
-        if inrange(r_r,g_r,b_r,i):
-            # print("right: ")
-            # print('R: {0}\t G: {1}\t B: {2}'.format(r_r, g_r, b_r))
+        if inRange(r_r,g_r,b_r,i):
             right = i
 
     return left,right
 
-def inrange(r,g,b, color_list):
+def inRange(r,g,b, color_list):
     offset = 5
-    if (color_list[0]-offset <= r <= color_list[0]+offset) and (color_list[1]-offset <= g <= color_list[1]+offset )and (color_list[2]-offset <= b <= color_list[2]+offset):
+    if ((max(color_list[0]-offset,0) <= r <= color_list[0]+offset) and (max(color_list[1]-offset,0) <= g <= color_list[1]+offset )and (max(color_list[2]-offset,0) <= b <= color_list[2]+offset)):
         return True 
     return False
 
@@ -104,44 +105,35 @@ def transition_state(color_left, color_right):
     global rounds
 
     if left_color == color_list_left[0] and right_color == color_list_right[0]:#black
-        print("black")
         state=STATES[0] # Move forward
 
     if left_color == color_list_left[2]:#green
-        print("green")
         state=STATES[4]
 
     if right_color==color_list_right[2]: #green
-        print("green")
         state=STATES[3]
 
     if left_color == color_list_left[0] and right_color == color_list_right[1]: #Black / white
-        print("black / white")
         if lane_state==LANE_STATES[0]:
             lane_state=LANE_STATES[1]
         state=STATES[3]
 
     if left_color == color_list_left[1] and right_color == color_list_right[0]: # white / black
-        print("white / black")
         state=STATES[4]
         if lane_state==LANE_STATES[0]:
             lane_state=LANE_STATES[2]
         
     if left_color == color_list_left[4]: # yellow
-        print("yellow left")
         state=STATES[2]
     if right_color == color_list_right[4]: # yellow
-        print("yellow right")
         state=STATES[2]
 
     if left_color == color_list_left[5] and right_color == color_list_right[5]: # red
-        print("red")
         if rounds<=0:
             state=STATES[1]
         state=STATES[5]
         
     if left_color == color_list_left[3] and right_color == color_list_right[3]: # blue
-        print("blue")
         state=STATES[6]
 
     if left_color==None and right_color==None: # none
@@ -195,9 +187,8 @@ def switch(state):
 #main loop of the programm
 while True:
     # Update sensor readings
-    get_colors()
+    # get_colors()
     left_color, right_color = update_sensors()
-    #print(left_color)
     
     # Handle state transitions
     wait(10)
@@ -211,3 +202,4 @@ while True:
 
 
 # Write your program here.
+�

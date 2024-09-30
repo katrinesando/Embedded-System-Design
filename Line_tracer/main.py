@@ -61,10 +61,10 @@ def transition_state(color_left, color_right):
         if lane_state==LANE_STATES[0]:
             lane_state=LANE_STATES[2]
         
-    if left_color == Color.YELLOW:  
-        state=STATES[2]
-    if right_color == Color.YELLOW:
-        state=STATES[2]
+   # if left_color == Color.YELLOW:  
+    #    state=STATES[2]
+    #if right_color == Color.YELLOW:
+    #    state=STATES[2]
 
     if left_color == Color.RED and right_color == Color.RED:
         if rounds<=0:
@@ -88,33 +88,35 @@ def switch(state):
         robot.drive(0,0)
     elif state ==  "SLOW":
         robot.drive(Speed/2,0)
-        wait(1000)
+        wait(300000/Speed)
     elif state ==  "TURN_LEFT":
         robot.drive(Speed,-45)
+        
     elif state ==  "TURN_RIGHT":
         robot.drive(Speed,45)
+         
     elif state ==  "SWITCH_LANE":
         if lane_state=="LEFT_LANE":
             robot.drive(Speed,45)
-            wait(600)# timing needs to be relativ to the speed. (maybe wait(30000/speed)). 30000 is the distance
+            wait(30000/Speed)# timing needs to be relativ to the speed. (maybe wait(30000/speed)). 30000 is the distance
             robot.drive(Speed,0)
-            wait(1000)
+            wait(140000/Speed)
             robot.drive(Speed,-45)
-            wait(600)
+            wait(30000/Speed)
             robot.drive(Speed,0)
-            rounds-=1
+            rounds=rounds-1
         elif lane_state=="RIGHT_LANE":
             robot.drive(Speed,-45)
-            wait(600)
+            wait(30000/Speed)
             robot.drive(Speed,0)
-            wait(2000)
+            wait(140000/Speed)
             robot.drive(Speed,45)
-            wait(600)
+            wait(30000/Speed)
             robot.drive(Speed,0)
-            rounds-=1
-        else:
-            print("No lane detected")
-            robot.drive(Speed,45)
+            rounds=rounds-1
+        #else:
+         #   print("No lane detected")
+         #   robot.drive(Speed,45)
     elif state == "HOLD":
         robot.drive(0,0)
         wait(3000)

@@ -24,6 +24,9 @@ sensor_right= Ev3devSensor(Port.S4)
 color_list_left = [] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 color_list_right = [] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
+# color_list_left = [(),(162,140,107),(),(),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+# color_list_right = [(),(127,209,117),(),(),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+
 
 STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD"]#All possible states the robot can have 
 LANE_STATES=["UNKNOWN","LEFT_LANE","RIGHT_LANE"]
@@ -31,17 +34,31 @@ rounds=1
 state=STATES[1]
 lane_state=LANE_STATES[0]
 Speed = 100
+left = None
+right = None
 
 # # Initialize the drive base.
 robot = DriveBase(motor_left, motor_right, wheel_diameter=55, axle_track=145) #Check for correct Parameter 
 
+# while True:
+#     if ev3.buttons.pressed() == True:
+#         print ("pressed")
+#     r, g, b = sensor_left.read('RGB-RAW')
+#     color_right = sensor_right.read('RGB-RAW')
+#     # Print results
+#     print('R: {0}\t G: {1}\t B: {2}'.format(r, g, b))
+#     print(color_right)
+#     wait(1000)
+
+
 def get_colors():
-    while len(color_list_left) <= 6:
+    while len(color_list_left) <= 5:
         with open('color.txt', 'w') as cf:
         # color_f = open('color.txt', 'w')
             pressed = ev3.buttons.pressed() 
             if pressed:
                 color_left = sensor_left.read('RGB-RAW')
+                print(color_left)
                 color_right = sensor_right.read('RGB-RAW')
                 r, g, b = sensor_left.read('RGB-RAW')
                 # r, g, b = sensor_right.read('RGB-RAW')
@@ -55,30 +72,26 @@ def get_colors():
     #         pass
 
 def update_sensors(): #Update sensor readings
+    global right, left
     r_l,g_l,b_l = sensor_left.read('RGB-RAW')
     r_r,g_r,b_r = sensor_right.read('RGB-RAW')
-    left = None
-    right = None
+    print('R: {0}\t G: {1}\t B: {2}'.format(r_l, g_l, b_l))
     # color_right = sensor_right.color()
     for i in color_list_left:
-        print('R: {0}\t G: {1}\t B: {2}'.format(r_l, g_l, b_l))
         if inrange(r_l,g_l,b_l,i):
+            # print("left: ")
             left = i
-        else:
-            print ("no")
-            left = None
-        wait(200)
+
     for i in color_list_right:
         if inrange(r_r,g_r,b_r,i):
-            right_color = i
-        else:
-            print ("no")
-            right = None
-        wait(200)
+            # print("right: ")
+            # print('R: {0}\t G: {1}\t B: {2}'.format(r_r, g_r, b_r))
+            right = i
+
     return left,right
 
 def inrange(r,g,b, color_list):
-    offset = 3
+    offset = 5
     if (color_list[0]-offset <= r <= color_list[0]+offset) and (color_list[1]-offset <= g <= color_list[1]+offset )and (color_list[2]-offset <= b <= color_list[2]+offset):
         return True 
     return False
@@ -91,38 +104,48 @@ def transition_state(color_left, color_right):
     global rounds
 
     if left_color == color_list_left[0] and right_color == color_list_right[0]:#black
+        print("black")
         state=STATES[0] # Move forward
 
     if left_color == color_list_left[2]:#green
+        print("green")
         state=STATES[4]
 
     if right_color==color_list_right[2]: #green
+        print("green")
         state=STATES[3]
 
     if left_color == color_list_left[0] and right_color == color_list_right[1]: #Black / white
+        print("black / white")
         if lane_state==LANE_STATES[0]:
             lane_state=LANE_STATES[1]
         state=STATES[3]
 
     if left_color == color_list_left[1] and right_color == color_list_right[0]: # white / black
+        print("white / black")
         state=STATES[4]
         if lane_state==LANE_STATES[0]:
             lane_state=LANE_STATES[2]
         
     if left_color == color_list_left[4]: # yellow
+        print("yellow left")
         state=STATES[2]
     if right_color == color_list_right[4]: # yellow
+        print("yellow right")
         state=STATES[2]
 
     if left_color == color_list_left[5] and right_color == color_list_right[5]: # red
+        print("red")
         if rounds<=0:
             state=STATES[1]
         state=STATES[5]
         
     if left_color == color_list_left[3] and right_color == color_list_right[3]: # blue
+        print("blue")
         state=STATES[6]
 
     if left_color==None and right_color==None: # none
+        # print("none")
         state=STATES[1]
         lane_state==[0]
 
@@ -179,8 +202,10 @@ while True:
     # Handle state transitions
     wait(10)
     transition_state(left_color, right_color)
+    left = None
+    right = None
     switch(state)
-    # print(state)
+    print(state)
 
     
 

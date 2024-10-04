@@ -29,16 +29,15 @@ sensor_right= ColorSensor(Port.S4)
 # color_list_right = [(),(43,80,79),(18,43,23),(6,23,29),(28,42,5),(20,10,5)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
 
-color_list_left = [(60,85,7),(243,21,89),(82,44,18),(180,57,7),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-color_list_right = [(100,66,9),(171,44,77),(120,60,35),(168,76,21),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+# color_list_left = [(60,85,7),(243,21,89),(82,44,18),(180,57,7),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+# color_list_right = [(100,66,9),(171,44,77),(120,60,35),(168,76,21),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
 # For drift lane rgb
 # color_list_left = [(12,13,1),((47,42,68)),((37,47,33)),((10,17,37)),((60,56,15)),((50,12,4))] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 # color_list_right = [((8,13,1)),((41,73,73)),((25,58,32)),((8,28,39)),((36,54,10)),((31,13,5))] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
-
-# color_list_left = [(48,100,5),(240,40,5),(115,25,46),(48,77,58),(223,75,44),(11,87,55)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-# color_list_right = [(90,83,12),(235,79,17),(132,56,50),(85,81,53),(201,82,40),(22,87,50)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_left = [(),(),(),(),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_right = [(),(),(),(),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
 
 STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD"]#All possible states the robot can have 
@@ -238,7 +237,7 @@ def switch(state):
 
 #main loop of the programm
 while True:
-    get_colors()
+    # get_colors()
     # Update sensor readings
     left_color, right_color = update_sensors()
     

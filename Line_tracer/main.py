@@ -87,9 +87,13 @@ def transition_state(color_left, color_right):
         state=STATES[0] # Move forward
 
     if left_color == 2:
+        if lane_state==LANE_STATES[0]:
+            lane_state=LANE_STATES[1]
         state=STATES[4]
 
     if right_color==2:
+        if lane_state==LANE_STATES[0]:
+            lane_state=LANE_STATES[2]
         state=STATES[3]
 
     if left_color == 1 and right_color == 3:
@@ -106,10 +110,14 @@ def transition_state(color_left, color_right):
         state=STATES[2]
    
     if left_color == 4 and right_color == 4: #lane switch
+        print("before")
+        print(rounds)
         if rounds<1:
             state=STATES[1]
+            print(rounds)
         else:
             state=STATES[5]
+           # print(rounds)
         
     if left_color == 5 and right_color == 5: #3 sec stop
         state=STATES[6]
@@ -117,6 +125,7 @@ def transition_state(color_left, color_right):
     if left_color==0 and right_color==0:
         state=STATES[1]
         lane_state=LANE_STATES[0]
+        rounds=1
 
 
 def color_num(color):
@@ -170,7 +179,7 @@ def switch(state):
             clear_lane()
             clear_array()
             Speed=200
-            print(rounds)
+           # print(rounds)
         elif lane_state=="RIGHT_LANE":
             Speed=100
             robot.drive(Speed,-45)
@@ -184,10 +193,11 @@ def switch(state):
             clear_lane()
             clear_array()
             Speed=200
-            print(rounds)
-        #else:
-         #   print("No lane detected")
-         #   robot.drive(Speed,45)
+            #print(rounds)
+        else:
+         
+            print("No lane detected")
+            robot.drive(Speed,45)
         clear_array()
     elif state == "HOLD":
         robot.drive(0,0)
@@ -218,7 +228,7 @@ while True:
     
     transition_state(left_color, right_color)
     switch(state)
-    print(lane_state)
+    #print(lane_state)
     #end=time.time()-start
     #print(end)
 

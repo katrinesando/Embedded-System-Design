@@ -88,44 +88,42 @@ def rgb_to_hsv(rgb):
 while True:
     if ev3.buttons.pressed() == True:
         print ("pressed")
-    r, g, b = rgb_to_hsv(sensor_left.rgb())
+    h, s, v = rgb_to_hsv(sensor_left.rgb())
     color_right = rgb_to_hsv(sensor_right.rgb())
     # Print results
-    print('R: {0}\t G: {1}\t B: {2}'.format(r, g, b))
+    print('H: {0}\t S: {1}\t V: {2}'.format(h,s,v))
     print(color_right)
     wait(1000)
 
 def get_colors():
     while len(color_list_left) <= 5:
-        with open('color.txt', 'w') as cf:
         # color_f = open('color.txt', 'w')
-            pressed = ev3.buttons.pressed() 
-            if pressed:
-                color_left = rgb_to_hsv(sensor_left.rgb())
-                print(color_left)
-                color_right = rgb_to_hsv(sensor_right.rgb())
-                r, g, b = sensor_left.rgb()
-                cf.write("hej")
-                color_list_left.append(color_left)
-                color_list_right.append(color_right)
-                print('R: {0}\t G: {1}\t B: {2}'.format(r, g, b))
-                wait(500)
+        pressed = ev3.buttons.pressed() 
+        if pressed:
+            color_left = rgb_to_hsv(sensor_left.rgb())
+            color_right = rgb_to_hsv(sensor_right.rgb())
+            h,s,v = rgb_to_hsv(sensor_right.rgb())
+            color_list_left.append(color_left)
+            color_list_right.append(color_right)
+            print(color_left)
+            print('H: {0}\t S: {1}\t V: {2}'.format(h,s,v))
+            wait(500)
 
 def update_sensors(): #Update sensor readings
     global right, left
-    r_l,g_l,b_l = rgb_to_hsv(sensor_left.rgb())
-    r_r,g_r,b_r = rgb_to_hsv(sensor_right.rgb())
-    print('H: {0}\t S: {1}\t V: {2}'.format(r_l, g_l, b_l))
+    h_l,s_l,v_l = rgb_to_hsv(sensor_left.rgb())
+    h_r,s_r,v_r = rgb_to_hsv(sensor_right.rgb())
+    print('H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
     print(rgb_to_hsv(sensor_right.rgb()))
     # color_right = sensor_right.color()
-    if (r_l == 0 and g_l == 0 and b_l == 0) and (r_r == 0 and g_r == 0 and b_r == 0):
+    if (h_l == 0 and s_l == 0 and v_l == 0) and (h_r == 0 and s_r == 0 and v_r == 0):
         return None, None
     for i in color_list_left:
-        if procentRange(r_l,g_l,b_l,i):
+        if procentRange(h_l,s_l,v_l,i):
             left = i
 
     for i in color_list_right:
-        if procentRange(r_r,g_r,b_r,i):
+        if procentRange(h_r,s_r,v_r,i):
             right = i
 
     return left,right
@@ -140,11 +138,11 @@ def proc(num, off):
     n = off*num
     return num-n, num+n
 
-def procentRange(r,g,b, color_list):
-    procR = proc(r,0.15)
-    procG = proc(g,0.40)
-    procB = proc(b,0.10)
-    if (procR[0]<= r <= procR[1]) and (procG[0]<= g <=procG[1]) and (procB[0] <= b <= procB[1]):
+def procentRange(h,s,v, color_list):
+    procH = proc(h,0.15)
+    procS = proc(s,0.40)
+    procV = proc(v,0.10)
+    if (procH[0]<= h <= procH[1]) and (procS[0]<= s <=procS[1]) and (procV[0] <= v <= procV[1]):
         return True
     return False
 

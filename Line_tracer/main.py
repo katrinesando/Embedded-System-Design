@@ -26,11 +26,19 @@ sensor_right= ColorSensor(Port.S4)
 
 #For papers
 # color_list_left = [(9,9,3),(59,56,76),(18,21,16),(5,10,16),(25,20,1),(31,10,6)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-# color_list_right = [(5,9,2),(43,80,79),(18,43,23),(6,23,29),(28,42,5),(20,10,5)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+# color_list_right = [(),(43,80,79),(18,43,23),(6,23,29),(28,42,5),(20,10,5)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
-# For drift lane
-color_list_left = [(12,13,1),(47,42,68),(37,47,33),(10,17,37),(60,56,15),(50,12,4)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-color_list_right = [(8,13,1),(41,73,73),(25,58,32),(8,28,39),(36,54,10),(31,13,5)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+
+color_list_left = [(60,85,7),(243,21,89),(82,44,18),(180,57,7),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_right = [(100,66,9),(171,44,77),(120,60,35),(168,76,21),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+
+# For drift lane rgb
+# color_list_left = [(12,13,1),((47,42,68)),((37,47,33)),((10,17,37)),((60,56,15)),((50,12,4))] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+# color_list_right = [((8,13,1)),((41,73,73)),((25,58,32)),((8,28,39)),((36,54,10)),((31,13,5))] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+
+
+# color_list_left = [(48,100,5),(240,40,5),(115,25,46),(48,77,58),(223,75,44),(11,87,55)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+# color_list_right = [(90,83,12),(235,79,17),(132,56,50),(85,81,53),(201,82,40),(22,87,50)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
 
 STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD"]#All possible states the robot can have 
@@ -45,16 +53,48 @@ right = None
 # # Initialize the drive base.
 robot = DriveBase(motor_left, motor_right, wheel_diameter=55, axle_track=145) #Check for correct Parameter 
 
-# while True:
-#     if ev3.buttons.pressed() == True:
-#         print ("pressed")
-#     r, g, b = sensor_left.rgb()
-#     color_right = sensor_right.rgb()
-#     # Print results
-#     print('R: {0}\t G: {1}\t B: {2}'.format(r, g, b))
-#     print(color_right)
-#     wait(5000)
 
+def rgb_to_hsv(rgb):
+    hsv = [0, 0, 0]
+    normRgb = [0, 0, 0]
+
+    for i in range(3):
+      normRgb[i] = rgb[i] / 100
+
+    cMax = max(normRgb)
+    cMin = min(normRgb)
+    diff = cMax - cMin
+
+    if cMax == cMin:
+      hsv[0] = 0
+    elif cMax == normRgb[0]:
+      hsv[0] = 60 * (normRgb[1] - normRgb[2]) / diff
+    elif cMax == normRgb[1]:
+      hsv[0] = 60 * (2 + (normRgb[2] - normRgb[0]) / diff)
+    else:
+      hsv[0] = 60 * (4 + (normRgb[0] - normRgb[1]) / diff)
+
+    if hsv[0] < 0:
+      hsv[0] += 360
+
+    if cMax == 0:
+      hsv[1] = 0
+    else:
+      hsv[1] = diff / cMax * 100
+
+    hsv[2] = cMax * 100
+
+    return hsv
+
+while True:
+    if ev3.buttons.pressed() == True:
+        print ("pressed")
+    r, g, b = rgb_to_hsv(sensor_left.rgb())
+    color_right = rgb_to_hsv(sensor_right.rgb())
+    # Print results
+    print('R: {0}\t G: {1}\t B: {2}'.format(r, g, b))
+    print(color_right)
+    wait(1000)
 
 def get_colors():
     while len(color_list_left) <= 5:
@@ -62,39 +102,51 @@ def get_colors():
         # color_f = open('color.txt', 'w')
             pressed = ev3.buttons.pressed() 
             if pressed:
-                color_left = sensor_left.rgb()
+                color_left = rgb_to_hsv(sensor_left.rgb())
                 print(color_left)
-                color_right = sensor_right.rgb()
+                color_right = rgb_to_hsv(sensor_right.rgb())
                 r, g, b = sensor_left.rgb()
                 cf.write("hej")
                 color_list_left.append(color_left)
                 color_list_right.append(color_right)
                 print('R: {0}\t G: {1}\t B: {2}'.format(r, g, b))
                 wait(500)
-    # while color_sensor.color() in POSSIBLE_COLORS:
-    #         pass
 
 def update_sensors(): #Update sensor readings
     global right, left
-    r_l,g_l,b_l = sensor_left.rgb()
-    r_r,g_r,b_r = sensor_right.rgb()
-    print('R: {0}\t G: {1}\t B: {2}'.format(r_l, g_l, b_l))
-    print(sensor_right.rgb())
+    r_l,g_l,b_l = rgb_to_hsv(sensor_left.rgb())
+    r_r,g_r,b_r = rgb_to_hsv(sensor_right.rgb())
+    print('H: {0}\t S: {1}\t V: {2}'.format(r_l, g_l, b_l))
+    print(rgb_to_hsv(sensor_right.rgb()))
     # color_right = sensor_right.color()
+    if (r_l == 0 and g_l == 0 and b_l == 0) and (r_r == 0 and g_r == 0 and b_r == 0):
+        return None, None
     for i in color_list_left:
-        if inRange(r_l,g_l,b_l,i):
+        if procentRange(r_l,g_l,b_l,i):
             left = i
 
     for i in color_list_right:
-        if inRange(r_r,g_r,b_r,i):
+        if procentRange(r_r,g_r,b_r,i):
             right = i
 
     return left,right
 
 def inRange(r,g,b, color_list):
-    offset = 5
-    if ((max(color_list[0]-offset,0) <= r <= color_list[0]+offset) and (max(color_list[1]-offset,0) <= g <= color_list[1]+offset )and (max(color_list[2]-offset,0) <= b <= color_list[2]+offset)):
+    OFFSET = 5
+    if ((max(color_list[0]-OFFSET,0) <= r <= color_list[0]+OFFSET) and (max(color_list[1]-OFFSET,0) <= g <= color_list[1]+OFFSET )and (max(color_list[2]-OFFSET,0) <= b <= color_list[2]+OFFSET)):
         return True 
+    return False
+
+def proc(num, off):
+    n = off*num
+    return num-n, num+n
+
+def procentRange(r,g,b, color_list):
+    procR = proc(r,0.15)
+    procG = proc(g,0.40)
+    procB = proc(b,0.10)
+    if (procR[0]<= r <= procR[1]) and (procG[0]<= g <=procG[1]) and (procB[0] <= b <= procB[1]):
+        return True
     return False
 
 
@@ -122,7 +174,7 @@ def transition_state(color_left, color_right):
         state=STATES[4]
         if lane_state==LANE_STATES[0]:
             lane_state=LANE_STATES[2]
-        
+
     if left_color == color_list_left[4]: # yellow
         state=STATES[2]
     if right_color == color_list_right[4]: # yellow
@@ -146,12 +198,12 @@ def transition_state(color_left, color_right):
 def switch(state):  
     global rounds
     if state ==  "DRIVE":
-        robot.drive(Speed,0)         
+        robot.drive(Speed,0)
     elif state ==  "STOP":
         robot.drive(0,0)
     elif state ==  "SLOW":
         robot.drive(Speed/2,0)
-        wait(1000)
+        wait(1000)         
     elif state ==  "TURN_LEFT":
         robot.drive(Speed,-45)
     elif state ==  "TURN_RIGHT":
@@ -186,8 +238,8 @@ def switch(state):
 
 #main loop of the programm
 while True:
+    get_colors()
     # Update sensor readings
-    # get_colors()
     left_color, right_color = update_sensors()
     
     # Handle state transitions
@@ -202,4 +254,3 @@ while True:
 
 
 # Write your program here.
-�

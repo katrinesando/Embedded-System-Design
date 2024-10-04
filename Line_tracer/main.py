@@ -22,8 +22,12 @@ sensor_right= ColorSensor(Port.S4)
 # color_list_left = [] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 # color_list_right = [] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
-color_list_left = [(94, 70, 20),(215, 30, 96),(133, 37, 72),(208, 78, 61),(63, 74, 70),(14, 79, 58)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-color_list_right = [(93, 75, 12),(192, 48, 70),(138,57,56),(201, 82, 41), (84, 79, 54),(17, 80, 30)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+# color_list_left = [(94, 70, 20),(215, 30, 96),(133, 37, 72),(208, 78, 61),(63, 74, 70),(14, 79, 58)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+# color_list_right = [(93, 75, 12),(192, 48, 70),(138,57,56),(201, 82, 41), (84, 79, 54),(17, 80, 30)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+# color_list_left = [(),(),(),(),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+# color_list_right = [(),(),(),(), (),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_left = [(96,71,21),(192,24,100),(132,37,80),(209,80,66),(61,77,80),(17,85,60)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_right = [(102,76,13),(186,48,77),(137,57,61),(201,81,44), (82,83,59),(20,81,32)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
 
 STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD"]#All possible states the robot can have 
@@ -40,15 +44,6 @@ right = None
 # Initialize the drive base.
 robot = DriveBase(motor_left, motor_right, wheel_diameter=55, axle_track=145) #Check for correct Parameter 
 
-# while True:
-#     if ev3.buttons.pressed() == True:
-#         print ("pressed")
-#     h, s, v = rgb_to_hsv(sensor_left.rgb())
-#     color_right = rgb_to_hsv(sensor_right.rgb())
-#     # Print results
-#     print('H: {0}\t S: {1}\t V: {2}'.format(h,s,v))
-#     print(color_right)
-#     wait(1000)
 
 def rgb_to_hsv(rgb):
     hsv = [0, 0, 0]
@@ -82,15 +77,25 @@ def rgb_to_hsv(rgb):
 
     return hsv
 
+# while True:
+#     if ev3.buttons.pressed() == True:
+#         print ("pressed")
+#     h, s, v = rgb_to_hsv(sensor_left.rgb())
+#     color_right = rgb_to_hsv(sensor_right.rgb())
+#     # Print results
+#     print('H: {0}\t S: {1}\t V: {2}'.format(h,s,v))
+#     print(color_right)
+#     wait(1000)
+    
 def proc(num, off):
     n = off*num
     return num-n, num+n
 
 # calculates allowed range for hsv values
 def procentRange(h,s,v, color_list):
-    procH = proc(color_list[0],0.25)
-    procS = proc(color_list[1],0.30)
-    procV = proc(color_list[2],0.15)
+    procH = proc(color_list[0],0.30) # 25
+    procS = proc(color_list[1],0.35) # 30
+    procV = proc(color_list[2],0.20) # 15
     if (procH[0]<= h <= procH[1]) and (procS[0]<= s <=procS[1]) and (procV[0] <= v <= procV[1]):
         return True
     return False
@@ -100,8 +105,8 @@ def find_color(): #Update sensor readings
     global right, left
     h_l,s_l,v_l = rgb_to_hsv(sensor_left.rgb())
     h_r,s_r,v_r = rgb_to_hsv(sensor_right.rgb())
-    # print('H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
-    # print(rgb_to_hsv(sensor_right.rgb()))
+    print('H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
+    print(rgb_to_hsv(sensor_right.rgb()))
     if (h_l == 0 and s_l == 0 and v_l == 0) and (h_r == 0 and s_r == 0 and v_r == 0):
         return None, None
     for i in color_list_left:
@@ -231,7 +236,6 @@ def switch(state):
         wait(300000/Speed)
     elif state ==  "TURN_LEFT":
         robot.drive(Speed,-45)
-        
     elif state ==  "TURN_RIGHT":
         robot.drive(Speed,45)
          
@@ -239,9 +243,9 @@ def switch(state):
         if lane_state=="LEFT_LANE":
             Speed=100
             robot.drive(Speed,45)
-            wait(30000/Speed)# timing needs to be relativ to the speed. (maybe wait(30000/speed)). 30000 is the distance
+            wait(20000/Speed)# timing needs to be relativ to the speed. (maybe wait(30000/speed)). 30000 is the distance
             robot.drive(Speed,0)
-            wait(200000/Speed)
+            wait(150000/Speed)
             #robot.drive(Speed,-45)
             #wait(30000/Speed)
             #robot.drive(Speed,0)
@@ -293,6 +297,6 @@ while True:
     left = None
     right = None
     switch(state)
-    #print(lane_state)
+    # print(lane_state)
     #end=time.time()-start
     #print(end)

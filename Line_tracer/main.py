@@ -86,6 +86,7 @@ def proc(num, off):
     n = off*num
     return num-n, num+n
 
+# calculates allowed range for hsv values
 def procentRange(h,s,v, color_list):
     procH = proc(color_list[0],0.25)
     procS = proc(color_list[1],0.30)
@@ -116,9 +117,11 @@ def find_color(): #Update sensor readings
 def update_sensors(): #Update sensor readings
     global left_array
     global right_array
+
     color_left, color_right = find_color()
-    left_array.append(color_num(color_left))
-    right_array.append(color_num(color_right))
+    left_array.append(color_num(color_left, color_list_left))
+    right_array.append(color_num(color_right, color_list_right))
+
     if len(left_array)>9:
         left_array.popleft()
     if len(right_array)>9:
@@ -158,41 +161,37 @@ def transition_state(color_left, color_right):
     if left_color == 1 and right_color == 1: # Black
         state=STATES[0] # Move forward
 
-    if left_color == 2: # Green
-        if lane_state==LANE_STATES[0]:
-            lane_state=LANE_STATES[1]
-        state=STATES[4]
-
-    if right_color==2: # Green
-        if lane_state==LANE_STATES[0]:
-            lane_state=LANE_STATES[2]
-        state=STATES[3]
-
-    if left_color == 1 and right_color == 3: # Black / White
+    if left_color == 1 and right_color == 2: # Black / White
         if lane_state==LANE_STATES[0]:
             lane_state=LANE_STATES[1]
         state=STATES[3]
 
-    if left_color == 3 and right_color == 1: # White / Black
+    if left_color == 2 and right_color == 1: # White / Black
         if lane_state==LANE_STATES[0]:
             lane_state=LANE_STATES[2]
         state=STATES[4]
         
-    if left_color == 6 or right_color == 6: #Yellow - slow down 
+    if left_color == 3: # Green
+        if lane_state==LANE_STATES[0]:
+            lane_state=LANE_STATES[1]
+        state=STATES[4]
+
+    if right_color == 3: # Green
+        if lane_state==LANE_STATES[0]:
+            lane_state=LANE_STATES[2]
+        state=STATES[3]
+
+    if left_color == 4 or right_color == 4: #Blue - 3 sec stop
+        state=STATES[6]
+
+    if left_color == 5 or right_color == 5: #Yellow - slow down 
         state=STATES[2]
    
-    if left_color == 4 and right_color == 4: #Red - lane switch
-        print("before")
-        print(rounds)
+    if left_color == 6 and right_color == 6: #Red - lane switch
         if rounds<1:
             state=STATES[1]
-            print(rounds)
         else:
             state=STATES[5]
-           # print(rounds)
-        
-    if left_color == 5 or right_color == 5: #Blue - 3 sec stop
-        state=STATES[6]
 
     if left_color==0 and right_color==0: # None
         state=STATES[1]
@@ -201,20 +200,20 @@ def transition_state(color_left, color_right):
 
 
 def color_num(color, color_list):
-    if color ==None:
+    if color == None:
         return 0
-    elif color== color_list[0]: #black
+    elif color == color_list[0]: # black
         return 1
-    elif color== color_list[1]: # white 
-        return 3
-    elif color== color_list[2]: # green
+    elif color == color_list[1]: # white 
         return 2
-    elif color ==color_list[3]: # blue
-        return 5
-    elif color == color_list[4]: # yellow
-        return 6
-    elif color== color_list[5]: # red
+    elif color == color_list[2]: # green
+        return 3
+    elif color ==color_list[3]:  # blue
         return 4
+    elif color == color_list[4]: # yellow
+        return 5
+    elif color == color_list[5]: # red
+        return 6
     else: 
         return 0
 
@@ -250,7 +249,6 @@ def switch(state):
             clear_lane()
             clear_array()
             Speed=200
-           # print(rounds)
         elif lane_state=="RIGHT_LANE":
             Speed=100
             robot.drive(Speed,-45)
@@ -264,9 +262,7 @@ def switch(state):
             clear_lane()
             clear_array()
             Speed=200
-            #print(rounds)
         else:
-         
             print("No lane detected")
             robot.drive(Speed,45)
         clear_array()
@@ -300,5 +296,3 @@ while True:
     #print(lane_state)
     #end=time.time()-start
     #print(end)
-
-# Write your program here.

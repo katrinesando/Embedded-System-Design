@@ -36,8 +36,8 @@ sensor_right= ColorSensor(Port.S4)
 # color_list_left = [(12,13,1),((47,42,68)),((37,47,33)),((10,17,37)),((60,56,15)),((50,12,4))] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 # color_list_right = [((8,13,1)),((41,73,73)),((25,58,32)),((8,28,39)),((36,54,10)),((31,13,5))] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
-color_list_left = [(),(),(),(),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-color_list_right = [(),(),(),(),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_left = [(94, 70, 20),(215, 30, 96),(133, 37, 72),(208, 78, 61),(63, 74, 70),(14, 79, 58)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_right = [(93, 75, 12),(192, 48, 70),(138,57,56),(201, 82, 41), (84, 79, 54),(17, 80, 30)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
 
 STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD"]#All possible states the robot can have 
@@ -45,10 +45,9 @@ LANE_STATES=["UNKNOWN","LEFT_LANE","RIGHT_LANE"]
 rounds=1
 state=STATES[1]
 lane_state=LANE_STATES[0]
-Speed = 100
+Speed = 200
 left = None
 right = None
-
 # # Initialize the drive base.
 robot = DriveBase(motor_left, motor_right, wheel_diameter=55, axle_track=145) #Check for correct Parameter 
 
@@ -85,19 +84,18 @@ def rgb_to_hsv(rgb):
 
     return hsv
 
-while True:
-    if ev3.buttons.pressed() == True:
-        print ("pressed")
-    h, s, v = rgb_to_hsv(sensor_left.rgb())
-    color_right = rgb_to_hsv(sensor_right.rgb())
-    # Print results
-    print('H: {0}\t S: {1}\t V: {2}'.format(h,s,v))
-    print(color_right)
-    wait(1000)
+# while True:
+#     if ev3.buttons.pressed() == True:
+#         print ("pressed")
+#     h, s, v = rgb_to_hsv(sensor_left.rgb())
+#     color_right = rgb_to_hsv(sensor_right.rgb())
+#     # Print results
+#     print('H: {0}\t S: {1}\t V: {2}'.format(h,s,v))
+#     print(color_right)
+#     wait(1000)
 
 def get_colors():
     while len(color_list_left) <= 5:
-        # color_f = open('color.txt', 'w')
         pressed = ev3.buttons.pressed() 
         if pressed:
             color_left = rgb_to_hsv(sensor_left.rgb())
@@ -115,7 +113,6 @@ def update_sensors(): #Update sensor readings
     h_r,s_r,v_r = rgb_to_hsv(sensor_right.rgb())
     print('H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
     print(rgb_to_hsv(sensor_right.rgb()))
-    # color_right = sensor_right.color()
     if (h_l == 0 and s_l == 0 and v_l == 0) and (h_r == 0 and s_r == 0 and v_r == 0):
         return None, None
     for i in color_list_left:
@@ -128,20 +125,14 @@ def update_sensors(): #Update sensor readings
 
     return left,right
 
-def inRange(r,g,b, color_list):
-    OFFSET = 5
-    if ((max(color_list[0]-OFFSET,0) <= r <= color_list[0]+OFFSET) and (max(color_list[1]-OFFSET,0) <= g <= color_list[1]+OFFSET )and (max(color_list[2]-OFFSET,0) <= b <= color_list[2]+OFFSET)):
-        return True 
-    return False
-
 def proc(num, off):
     n = off*num
     return num-n, num+n
 
 def procentRange(h,s,v, color_list):
-    procH = proc(h,0.15)
-    procS = proc(s,0.40)
-    procV = proc(v,0.10)
+    procH = proc(color_list[0],0.25)
+    procS = proc(color_list[1],0.30)
+    procV = proc(color_list[2],0.15)
     if (procH[0]<= h <= procH[1]) and (procS[0]<= s <=procS[1]) and (procV[0] <= v <= procV[1]):
         return True
     return False
@@ -172,9 +163,7 @@ def transition_state(color_left, color_right):
         if lane_state==LANE_STATES[0]:
             lane_state=LANE_STATES[2]
 
-    if left_color == color_list_left[4]: # yellow
-        state=STATES[2]
-    if right_color == color_list_right[4]: # yellow
+    if left_color == color_list_left[4] or right_color == color_list_right[4]: # yellow
         state=STATES[2]
 
     if left_color == color_list_left[5] and right_color == color_list_right[5]: # red
@@ -182,11 +171,10 @@ def transition_state(color_left, color_right):
             state=STATES[1]
         state=STATES[5]
         
-    if left_color == color_list_left[3] and right_color == color_list_right[3]: # blue
+    if left_color == color_list_left[3] or right_color == color_list_right[3]: # blue
         state=STATES[6]
 
     if left_color==None and right_color==None: # none
-        # print("none")
         state=STATES[1]
         lane_state==[0]
 

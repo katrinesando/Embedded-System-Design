@@ -30,3 +30,31 @@ while True:
     wait(1000)
 
     
+def get_colors():
+    while len(color_list_left) <= 5:
+        with open('color.txt', 'w') as cf:
+        # color_f = open('color.txt', 'w')
+            pressed = ev3.buttons.pressed() 
+            if pressed:
+                color_left = sensor_left.rgb()
+                print(color_left)
+                color_right = sensor_right.rgb()
+                r, g, b = sensor_left.rgb()
+                cf.write("hej")
+                color_list_left.append(color_left)
+                color_list_right.append(color_right)
+                print('R: {0}\t G: {1}\t B: {2}'.format(r, g, b))
+                wait(500)
+
+def get_colors():
+    while len(color_list_left) <= 5:
+        pressed = ev3.buttons.pressed() 
+        if pressed:
+            color_left = rgb_to_hsv(sensor_left.rgb())
+            color_right = rgb_to_hsv(sensor_right.rgb())
+            h,s,v = rgb_to_hsv(sensor_right.rgb())
+            color_list_left.append(color_left)
+            color_list_right.append(color_right)
+            print(color_left)
+            print('H: {0}\t S: {1}\t V: {2}'.format(h,s,v))
+            wait(500)

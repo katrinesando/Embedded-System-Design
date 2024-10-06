@@ -127,9 +127,9 @@ def update_sensors(): #Update sensor readings
     left_array.append(color_num(color_left, color_list_left))
     right_array.append(color_num(color_right, color_list_right))
 
-    if len(left_array)>9:
+    if len(left_array)>4:
         left_array.popleft()
-    if len(right_array)>9:
+    if len(right_array)>4:
         right_array.popleft()
     #print(right_array)
     color_left=most_common(left_array)

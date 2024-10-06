@@ -26,8 +26,8 @@ sensor_right= ColorSensor(Port.S4)
 # color_list_right = [(93, 75, 12),(192, 48, 70),(138,57,56),(201, 82, 41), (84, 79, 54),(17, 80, 30)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 # color_list_left = [(),(),(),(),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 # color_list_right = [(),(),(),(), (),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-color_list_left = [(96,71,21),(192,24,100),(132,37,80),(209,80,66),(61,77,80),(17,85,60)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-color_list_right = [(102,76,13),(186,48,77),(137,57,61),(201,81,44), (82,83,59),(20,81,32)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_left = [(100,60,20),(192,23,100),(132,37,74),(213,80,68),(61,77,73),(14,71,60)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_right = [(108,50,10),(186,47,78),(137,57,56),(204,81,42), (82,83,59),(19,75,32)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
 
 STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD"]#All possible states the robot can have 

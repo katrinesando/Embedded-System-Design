@@ -36,8 +36,11 @@ sensor_right= ColorSensor(Port.S4)
 # color_list_left = [(12,13,1),((47,42,68)),((37,47,33)),((10,17,37)),((60,56,15)),((50,12,4))] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 # color_list_right = [((8,13,1)),((41,73,73)),((25,58,32)),((8,28,39)),((36,54,10)),((31,13,5))] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
-color_list_left = [(94, 70, 20),(215, 30, 96),(133, 37, 72),(208, 78, 61),(63, 74, 70),(14, 79, 58)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-color_list_right = [(93, 75, 12),(192, 48, 70),(138,57,56),(201, 82, 41), (84, 79, 54),(17, 80, 30)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+# color_list_left = [(94, 70, 20),(215, 30, 96),(133, 37, 72),(208, 78, 61),(63, 74, 70),(14, 79, 58)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+# color_list_right = [(93, 75, 12),(192, 48, 70),(138,57,56),(201, 82, 41), (84, 79, 54),(17, 80, 30)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_left = [(95,60,20),(192,23,100),(132,37,74),(213,80,68),(61,77,73),(14,71,60)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_right = [(108,60,10),(186,47,78),(137,57,56),(204,81,42), (82,83,59),(19,75,32)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+
 
 
 STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD"]#All possible states the robot can have 
@@ -130,7 +133,7 @@ def proc(num, off):
     return num-n, num+n
 
 def procentRange(h,s,v, color_list):
-    procH = proc(color_list[0],0.25)
+    procH = proc(color_list[0],0.30)
     procS = proc(color_list[1],0.45)
     procV = proc(color_list[2],0.15)
     if (procH[0]<= h <= procH[1]) and (procS[0]<= s <=procS[1]) and (procV[0] <= v <= procV[1]):

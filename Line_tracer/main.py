@@ -131,7 +131,7 @@ def proc(num, off):
 
 def procentRange(h,s,v, color_list):
     procH = proc(color_list[0],0.25)
-    procS = proc(color_list[1],0.30)
+    procS = proc(color_list[1],0.45)
     procV = proc(color_list[2],0.15)
     if (procH[0]<= h <= procH[1]) and (procS[0]<= s <=procS[1]) and (procV[0] <= v <= procV[1]):
         return True

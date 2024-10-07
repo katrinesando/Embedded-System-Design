@@ -19,17 +19,9 @@ motor_left = Motor(Port.C) #Check for correct Port
 motor_right = Motor(Port.B) 
 sensor_left= ColorSensor(Port.S3)
 sensor_right= ColorSensor(Port.S4)
-# color_list_left = [] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-# color_list_right = [] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
-# color_list_left = [(94, 70, 20),(215, 30, 96),(133, 37, 72),(208, 78, 61),(63, 74, 70),(14, 79, 58)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-# color_list_right = [(93, 75, 12),(192, 48, 70),(138,57,56),(201, 82, 41), (84, 79, 54),(17, 80, 30)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-# color_list_left = [(),(),(),(),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-# color_list_right = [(),(),(),(), (),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-color_list_left = [(105,55,18),(203,30,70),(137,38,71),(213,80,68),(61,77,73),(14,71,50), (110,47,25),(100,30,9), (100,30,40),(180,30,30),(210,30,100),(170,14,41)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED, 6-8= Black, 9-10= White v2, 11= Green
-color_list_right = [(97,60,11),(187,47,71),(140,57,56),(204,81,42), (82,83,59),(19,75,32), (97,60,11), (120,57,7),(120,57,7),(200,47,20),(200,47,20),(140,57,56)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED, 6-8= Black, 9= White v2, 11 = Green
-# (88,87,24) # left red
-# (115,44,27) # right red 
+color_list_left = [(105,55,18),(203,30,70),(137,38,71),(213,80,68),(61,77,73),(14,71,50), (110,47,25),(100,30,9), (100,30,40),(180,30,30),(210,30,100),(170,14,41), (21,81,27), (93,78,23),(180,10,70),(180,18,11),(220,47,70),(102,45,37),(132,29,17)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED, 6-8 + 17-18= Black, 9-10 + 15= White v2, 11= Green, 12 = red
+color_list_right = [(97,60,11),(187,47,71),(140,57,56),(204,81,42), (82,83,59),(19,75,32), (97,60,11), (120,57,7),(120,57,7),(200,47,20),(200,47,20),(140,57,56),(19,75,32),(93,81,11),(180,38,10),(97,60,11),(187,47,71),(97,60,11),(97,60,11)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED, 6-8 + 17-18= Black, 9-10 + 15= White v2, 11= Green, 12 = red
 
 STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD"]#All possible states the robot can have 
 LANE_STATES=["UNKNOWN","LEFT_LANE","RIGHT_LANE"]
@@ -45,7 +37,7 @@ right = None
 # Initialize the drive base.
 robot = DriveBase(motor_left, motor_right, wheel_diameter=55, axle_track=145) #Check for correct Parameter 
 
-
+# calculating of rgb to hsv
 def rgb_to_hsv(rgb):
     hsv = [0, 0, 0]
     normRgb = [0, 0, 0]
@@ -78,16 +70,6 @@ def rgb_to_hsv(rgb):
 
     return hsv
 
-# while True:
-#     if ev3.buttons.pressed() == True:
-#         print ("pressed")
-#     h, s, v = rgb_to_hsv(sensor_left.rgb())
-#     color_right = rgb_to_hsv(sensor_right.rgb())
-#     # Print results
-#     print('H: {0}\t S: {1}\t V: {2}'.format(h,s,v))
-#     print(color_right)
-#     wait(1000)
-    
 def proc(num, off):
     n = off*num
     return num-n, num+n
@@ -115,15 +97,6 @@ def find_color(): #Update sensor readings
     for i in color_list_right:
         if procentRange(h_r,s_r,v_r,i):
             right = i
-    if right == None and left == None:
-        print('H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
-        print(rgb_to_hsv(sensor_right.rgb()))
-        print("----------------\n")
-    elif left == None:
-        print('L -> H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
-    elif right == None:
-        print(rgb_to_hsv(sensor_right.rgb()))
-
 
     return left,right
 
@@ -139,7 +112,6 @@ def update_sensors(): #Update sensor readings
         left_array.popleft()
     if len(right_array)>3:
         right_array.popleft()
-    #print(right_array)
     color_left=most_common(left_array)
     color_right=most_common(right_array)
 
@@ -161,8 +133,6 @@ def most_common (array):
         if count > max_count:
             max_count = count
             most_common_number = num    
-    
-    #print(most_common_number)
     return most_common_number
    
 # function changes state depending of sensor outputs
@@ -206,18 +176,21 @@ def transition_state(color_left, color_right):
             if rounds==0:
                 ev3.speaker.beep(400,100)
                 rounds=rounds-1
+                while True:
+                    Speed = 0
+                    robot.drive(0,0)
         else:
             state=STATES[5]
 
     if left_color==0 and right_color==0: # None
-        state=STATES[1]
+        state=STATES[0]
 
 def color_num(color, color_list):
     if color == None:
         return 0
-    elif color == color_list[0] or color == color_list[6] or color == color_list[7] or color == color_list[8]: # black
+    elif color == color_list[0] or color == color_list[6] or color == color_list[7] or color == color_list[8] or color == color_list[13] or color == color_list[15]or color == color_list[17]or color == color_list[18]: # black
         return 1
-    elif color == color_list[1] or color == color_list[9] or color == color_list[10]: # white 
+    elif color == color_list[1] or color == color_list[9] or color == color_list[10] or color == color_list[14] or color == color_list[16]: # white 
         return 2
     elif color == color_list[2] or color == color_list[11]: # green
         return 3
@@ -225,7 +198,7 @@ def color_num(color, color_list):
         return 4
     elif color == color_list[4]: # yellow
         return 5
-    elif color == color_list[5] : # red
+    elif color == color_list[5]: # red
         return 6
     else: 
         return 0
@@ -250,39 +223,25 @@ def switch(state):
     elif state ==  "SWITCH_LANE":
         if lane_state=="LEFT_LANE":
             print("left")
-            Speed=75
-            #------------test-------------------
-            # robot.drive(Speed, 30)
-            # wait(20000/Speed)
-            # robot.drive(Speed,0)
-            # wait(1000/Speed)
-
-            #-------------Original---------------
+            Speed=100
             robot.drive(Speed,60)
-            wait(30000/Speed)# timing needs to be relativ to the speed. (maybe wait(30000/speed)). 30000 is the distance
+            wait(35000/Speed)# timing needs to be relativ to the speed. (maybe wait(30000/speed)). 30000 is the distance
             robot.drive(Speed,0)
             wait(150000/Speed)
-            #robot.drive(Speed,-45)
-            #wait(30000/Speed)
-            #robot.drive(Speed,0)
-            rounds=rounds-1
+
             clear_lane()
             clear_array()
-            Speed=150
+            Speed=200
         elif lane_state=="RIGHT_LANE":
             print("right")
-            Speed=75
+            Speed=100
             robot.drive(Speed,-60)
             wait(30000/Speed)
             robot.drive(Speed,0)
             wait(150000/Speed)
-           # robot.drive(Speed,45)
-            #wait(30000/Speed)
-            #robot.drive(Speed,0)
-            rounds=rounds-1
             clear_lane()
             clear_array()
-            Speed=150
+            Speed=200
         else:
             print("No lane detected")
             robot.drive(Speed,45)
@@ -292,7 +251,7 @@ def switch(state):
         wait(3000)
         robot.drive(Speed,0)
         clear_array()
-        wait(500)
+        wait(300)
 
 def clear_array():
     global left_array
@@ -305,7 +264,6 @@ def clear_lane():
 
 #main loop of the programm
 while True:
-    
     start=time.time()
     # Update sensor readings
     left_color, right_color = update_sensors()
@@ -321,9 +279,6 @@ while True:
         state=STATES[1]
         lane_state=LANE_STATES[0]
         rounds=1
-        Speed=150
+        Speed=200
         ev3.speaker.beep(500,100)
         pressed=False
-    # print(lane_state)
-    #end=time.time()-start
-    #print(end)

@@ -313,6 +313,7 @@ while True:
     switch(state)
     pressed = ev3.buttons.pressed() 
     if pressed:
+        print("reset")
         state=STATES[1]
         lane_state=LANE_STATES[0]
         rounds=1

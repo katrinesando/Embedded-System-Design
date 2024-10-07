@@ -26,16 +26,17 @@ sensor_right= ColorSensor(Port.S4)
 # color_list_right = [(93, 75, 12),(192, 48, 70),(138,57,56),(201, 82, 41), (84, 79, 54),(17, 80, 30)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 # color_list_left = [(),(),(),(),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 # color_list_right = [(),(),(),(), (),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-color_list_left = [(100,60,20),(192,23,100),(132,37,74),(213,80,68),(61,77,73),(14,71,60)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-color_list_right = [(108,50,10),(186,47,78),(137,57,56),(204,81,42), (82,83,59),(19,75,32)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-
+color_list_left = [(105,55,18),(203,30,70),(137,38,71),(213,80,68),(61,77,73),(14,71,50), (110,47,25),(100,30,9), (100,30,40),(180,30,30)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED, 6-8= Black, 9= White v2
+color_list_right = [(97,60,11),(187,47,71),(140,57,56),(204,81,42), (82,83,59),(19,75,32), (97,60,11), (120,57,7),(120,57,7),(200,47,20)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED, 6-8= Black, 9= White v2
+# (88,87,24) # left red
+# (115,44,27) # right red 
 
 STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD"]#All possible states the robot can have 
 LANE_STATES=["UNKNOWN","LEFT_LANE","RIGHT_LANE"]
 rounds=1
 state=STATES[1]
 lane_state=LANE_STATES[0]
-Speed = 200
+Speed = 150
 left_array=deque([0])
 right_array=deque([0])
 left = None
@@ -95,7 +96,7 @@ def proc(num, off):
 def procentRange(h,s,v, color_list):
     procH = proc(color_list[0],0.30) # 25
     procS = proc(color_list[1],0.35) # 30
-    procV = proc(color_list[2],0.20) # 15
+    procV = proc(color_list[2],0.40) # 15
     if (procH[0]<= h <= procH[1]) and (procS[0]<= s <=procS[1]) and (procV[0] <= v <= procV[1]):
         return True
     return False
@@ -105,8 +106,6 @@ def find_color(): #Update sensor readings
     global right, left
     h_l,s_l,v_l = rgb_to_hsv(sensor_left.rgb())
     h_r,s_r,v_r = rgb_to_hsv(sensor_right.rgb())
-    print('H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
-    print(rgb_to_hsv(sensor_right.rgb()))
     if (h_l == 0 and s_l == 0 and v_l == 0) and (h_r == 0 and s_r == 0 and v_r == 0):
         return None, None
     for i in color_list_left:
@@ -116,6 +115,15 @@ def find_color(): #Update sensor readings
     for i in color_list_right:
         if procentRange(h_r,s_r,v_r,i):
             right = i
+    if right == None and left == None:
+        print('H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
+        print(rgb_to_hsv(sensor_right.rgb()))
+        print("----------------\n")
+    elif left == None:
+        print('L -> H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
+    elif right == None:
+        print(rgb_to_hsv(sensor_right.rgb()))
+
 
     return left,right
 
@@ -127,9 +135,9 @@ def update_sensors(): #Update sensor readings
     left_array.append(color_num(color_left, color_list_left))
     right_array.append(color_num(color_right, color_list_right))
 
-    if len(left_array)>4:
+    if len(left_array)>3:
         left_array.popleft()
-    if len(right_array)>4:
+    if len(right_array)>3:
         right_array.popleft()
     #print(right_array)
     color_left=most_common(left_array)
@@ -200,16 +208,13 @@ def transition_state(color_left, color_right):
 
     if left_color==0 and right_color==0: # None
         state=STATES[1]
-        lane_state=LANE_STATES[0]
-        rounds=1
-
 
 def color_num(color, color_list):
     if color == None:
         return 0
-    elif color == color_list[0]: # black
+    elif color == color_list[0] or color == color_list[6] or color == color_list[7] or color == color_list[8]: # black
         return 1
-    elif color == color_list[1]: # white 
+    elif color == color_list[1]or color == color_list[9]: # white 
         return 2
     elif color == color_list[2]: # green
         return 3
@@ -217,7 +222,7 @@ def color_num(color, color_list):
         return 4
     elif color == color_list[4]: # yellow
         return 5
-    elif color == color_list[5]: # red
+    elif color == color_list[5] : # red
         return 6
     else: 
         return 0
@@ -235,13 +240,21 @@ def switch(state):
         clear_array()
         wait(300000/Speed)
     elif state ==  "TURN_LEFT":
-        robot.drive(Speed,-45)
+        robot.drive(Speed,-30)
     elif state ==  "TURN_RIGHT":
-        robot.drive(Speed,45)
+        robot.drive(Speed,30)
          
     elif state ==  "SWITCH_LANE":
         if lane_state=="LEFT_LANE":
-            Speed=100
+            print("left")
+            Speed=75
+            #------------test-------------------
+            # robot.drive(Speed, 30)
+            # wait(20000/Speed)
+            # robot.drive(Speed,0)
+            # wait(1000/Speed)
+
+            #-------------Original---------------
             robot.drive(Speed,45)
             wait(20000/Speed)# timing needs to be relativ to the speed. (maybe wait(30000/speed)). 30000 is the distance
             robot.drive(Speed,0)
@@ -252,9 +265,10 @@ def switch(state):
             rounds=rounds-1
             clear_lane()
             clear_array()
-            Speed=200
+            Speed=150
         elif lane_state=="RIGHT_LANE":
-            Speed=100
+            print("right")
+            Speed=75
             robot.drive(Speed,-45)
             wait(30000/Speed)
             robot.drive(Speed,0)
@@ -265,7 +279,7 @@ def switch(state):
             rounds=rounds-1
             clear_lane()
             clear_array()
-            Speed=200
+            Speed=150
         else:
             print("No lane detected")
             robot.drive(Speed,45)
@@ -275,7 +289,7 @@ def switch(state):
         wait(3000)
         robot.drive(Speed,0)
         clear_array()
-        wait(1000)
+        wait(500)
 
 def clear_array():
     global left_array
@@ -297,6 +311,11 @@ while True:
     left = None
     right = None
     switch(state)
+    pressed = ev3.buttons.pressed() 
+    if pressed:
+        state=STATES[1]
+        lane_state=LANE_STATES[0]
+        rounds=1
     # print(lane_state)
     #end=time.time()-start
     #print(end)

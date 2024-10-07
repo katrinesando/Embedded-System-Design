@@ -36,7 +36,7 @@ LANE_STATES=["UNKNOWN","LEFT_LANE","RIGHT_LANE"]
 rounds=1
 state=STATES[1]
 lane_state=LANE_STATES[0]
-Speed = 150
+Speed = 0
 left_array=deque([0])
 right_array=deque([0])
 left = None
@@ -203,6 +203,9 @@ def transition_state(color_left, color_right):
     if left_color == 6 and right_color == 6: #Red - lane switch
         if rounds<1:
             state=STATES[1]
+            if rounds==0:
+                ev3.speaker.beep(400,100)
+                rounds=rounds-1
         else:
             state=STATES[5]
 
@@ -255,8 +258,8 @@ def switch(state):
             # wait(1000/Speed)
 
             #-------------Original---------------
-            robot.drive(Speed,45)
-            wait(20000/Speed)# timing needs to be relativ to the speed. (maybe wait(30000/speed)). 30000 is the distance
+            robot.drive(Speed,60)
+            wait(30000/Speed)# timing needs to be relativ to the speed. (maybe wait(30000/speed)). 30000 is the distance
             robot.drive(Speed,0)
             wait(150000/Speed)
             #robot.drive(Speed,-45)
@@ -269,8 +272,8 @@ def switch(state):
         elif lane_state=="RIGHT_LANE":
             print("right")
             Speed=75
-            robot.drive(Speed,-45)
-            wait(20000/Speed)
+            robot.drive(Speed,-60)
+            wait(30000/Speed)
             robot.drive(Speed,0)
             wait(150000/Speed)
            # robot.drive(Speed,45)
@@ -302,6 +305,7 @@ def clear_lane():
 
 #main loop of the programm
 while True:
+    
     start=time.time()
     # Update sensor readings
     left_color, right_color = update_sensors()
@@ -317,6 +321,9 @@ while True:
         state=STATES[1]
         lane_state=LANE_STATES[0]
         rounds=1
+        Speed=150
+        ev3.speaker.beep(500,100)
+        pressed=False
     # print(lane_state)
     #end=time.time()-start
     #print(end)

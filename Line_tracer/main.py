@@ -38,6 +38,7 @@ right = None
 robot = DriveBase(motor_left, motor_right, wheel_diameter=55, axle_track=145) #Check for correct Parameter 
 
 # calculating of rgb to hsv
+# from https://tutorials.aposteriori.com.sg/110-Pybricks-Basics/99-Special-Topics/20-HSV-and-RGB.html
 def rgb_to_hsv(rgb):
     hsv = [0, 0, 0]
     normRgb = [0, 0, 0]

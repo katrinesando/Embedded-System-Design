@@ -26,8 +26,8 @@ sensor_right= ColorSensor(Port.S4)
 # color_list_right = [(93, 75, 12),(192, 48, 70),(138,57,56),(201, 82, 41), (84, 79, 54),(17, 80, 30)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 # color_list_left = [(),(),(),(),(),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 # color_list_right = [(),(),(),(), (),()] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-color_list_left = [(105,55,18),(203,30,70),(137,38,71),(213,80,68),(61,77,73),(14,71,50), (110,47,25),(100,30,9), (100,30,40),(180,30,30)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED, 6-8= Black, 9= White v2
-color_list_right = [(97,60,11),(187,47,71),(140,57,56),(204,81,42), (82,83,59),(19,75,32), (97,60,11), (120,57,7),(120,57,7),(200,47,20)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED, 6-8= Black, 9= White v2
+color_list_left = [(105,55,18),(203,30,70),(137,38,71),(213,80,68),(61,77,73),(14,71,50), (110,47,25),(100,30,9), (100,30,40),(180,30,30),(210,30,100),(170,14,41)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED, 6-8= Black, 9-10= White v2, 11= Green
+color_list_right = [(97,60,11),(187,47,71),(140,57,56),(204,81,42), (82,83,59),(19,75,32), (97,60,11), (120,57,7),(120,57,7),(200,47,20),(200,47,20),(140,57,56)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED, 6-8= Black, 9= White v2, 11 = Green
 # (88,87,24) # left red
 # (115,44,27) # right red 
 
@@ -214,9 +214,9 @@ def color_num(color, color_list):
         return 0
     elif color == color_list[0] or color == color_list[6] or color == color_list[7] or color == color_list[8]: # black
         return 1
-    elif color == color_list[1]or color == color_list[9]: # white 
+    elif color == color_list[1] or color == color_list[9] or color == color_list[10]: # white 
         return 2
-    elif color == color_list[2]: # green
+    elif color == color_list[2] or color == color_list[11]: # green
         return 3
     elif color ==color_list[3]:  # blue
         return 4
@@ -240,9 +240,9 @@ def switch(state):
         clear_array()
         wait(300000/Speed)
     elif state ==  "TURN_LEFT":
-        robot.drive(Speed,-30)
+        robot.drive(Speed,-60)
     elif state ==  "TURN_RIGHT":
-        robot.drive(Speed,30)
+        robot.drive(Speed,60)
          
     elif state ==  "SWITCH_LANE":
         if lane_state=="LEFT_LANE":
@@ -270,9 +270,9 @@ def switch(state):
             print("right")
             Speed=75
             robot.drive(Speed,-45)
-            wait(30000/Speed)
+            wait(20000/Speed)
             robot.drive(Speed,0)
-            wait(200000/Speed)
+            wait(150000/Speed)
            # robot.drive(Speed,45)
             #wait(30000/Speed)
             #robot.drive(Speed,0)

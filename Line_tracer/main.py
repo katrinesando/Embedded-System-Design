@@ -142,6 +142,10 @@ def transition_state(color_left, color_right):
     global lane_state
     global rounds
 
+    # if dist < allowed_dist
+    #   switch lane and lanestate
+    
+
     if left_color == 1 and right_color == 1: # Black
         state=STATES[0] # Move forward
 
@@ -172,14 +176,14 @@ def transition_state(color_left, color_right):
         state=STATES[2]
    
     if left_color == 6 and right_color == 6: #Red - lane switch
-        if rounds<1:
-            state=STATES[1]
-            if rounds==0:
-                ev3.speaker.beep(400,100)
-                rounds=rounds-1
-                while True:
-                    Speed = 0
-                    robot.drive(0,0)
+        rounds=rounds-1
+        # if rounds<1:
+        #     state=STATES[1]
+        #     if rounds==0:
+        #         ev3.speaker.beep(400,100)
+        #         while True:
+        #             Speed = 0
+        #             robot.drive(0,0)
         else:
             state=STATES[5]
 
@@ -220,7 +224,6 @@ def switch(state):
         robot.drive(Speed,-60)
     elif state ==  "TURN_RIGHT":
         robot.drive(Speed,60)
-         
     elif state ==  "SWITCH_LANE":
         if lane_state=="LEFT_LANE":
             print("left")

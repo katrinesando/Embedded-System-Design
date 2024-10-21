@@ -15,10 +15,12 @@ from collections import *
 ev3 = EV3Brick()
 
 # Initialize the motors and sensors.
-motor_left = Motor(Port.C) #Check for correct Port 
-motor_right = Motor(Port.B) 
-sensor_left= ColorSensor(Port.S3)
+motor_left = Motor(Port.A) #Check for correct Port 
+motor_right = Motor(Port.D) 
+sensor_left= ColorSensor(Port.S1)
 sensor_right= ColorSensor(Port.S4)
+ultraSonic = UltrasonicSensor(Port.S2)
+infrared = InfraredSensor(Port.S3)
 
 color_list_left = [(105,55,18),(203,30,70),(137,38,71),(213,80,68),(61,77,73),(14,71,50), (110,47,25),(100,30,9), (100,30,40),(180,30,30),(210,30,100),(170,14,41), (21,81,27), (93,78,23),(180,10,70),(180,18,11),(220,47,70),(102,45,37),(132,29,17)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED, 6-8 + 17-18= Black, 9-10 + 15= White v2, 11= Green, 12 = red
 color_list_right = [(97,60,11),(187,47,71),(140,57,56),(204,81,42), (82,83,59),(19,75,32), (97,60,11), (120,57,7),(120,57,7),(200,47,20),(200,47,20),(140,57,56),(19,75,32),(93,81,11),(180,38,10),(97,60,11),(187,47,71),(97,60,11),(97,60,11)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED, 6-8 + 17-18= Black, 9-10 + 15= White v2, 11= Green, 12 = red

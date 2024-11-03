@@ -19,25 +19,26 @@ motor_left = Motor(Port.A) #Check for correct Port
 motor_right = Motor(Port.D) 
 sensor_left= ColorSensor(Port.S1)
 sensor_right= ColorSensor(Port.S4)
-ultraSonic = UltrasonicSensor(Port.S2)
-infrared = InfraredSensor(Port.S3)
+ultraSonic_front = UltrasonicSensor(Port.S2)
+ultraSonic_back = UltrasonicSensor(Port.S3)
 
-color_list_left = [(105,55,18),(203,30,70),(137,38,71),(213,80,68),(61,77,73),(14,71,50), (110,47,25),(100,30,9), (100,30,40),(180,30,30),(210,30,100),(170,14,41), (21,81,27), (93,78,23),(180,10,70),(180,18,11),(220,47,70),(102,45,37),(132,29,17)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED, 6-8 + 17-18= Black, 9-10 + 15= White v2, 11= Green, 12 = red
-color_list_right = [(97,60,11),(187,47,71),(140,57,56),(204,81,42), (82,83,59),(19,75,32), (97,60,11), (120,57,7),(120,57,7),(200,47,20),(200,47,20),(140,57,56),(19,75,32),(93,81,11),(180,38,10),(97,60,11),(187,47,71),(97,60,11),(97,60,11)] # 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED, 6-8 + 17-18= Black, 9-10 + 15= White v2, 11= Green, 12 = red
+color_list_left = [(0,0,0),(211, 78, 65),(63,65,69)] # 0+6=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_right = [(0,0,0),(205,84,44),(86,70,55)] # 0+6=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
-STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD"]#All possible states the robot can have 
+STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD", "PARK"] #All possible states the robot can have 
 LANE_STATES=["UNKNOWN","LEFT_LANE","RIGHT_LANE"]
 rounds=1
 state=STATES[1]
 lane_state=LANE_STATES[0]
-Speed = 0
+Speed = -150
 left_array=deque([0])
 right_array=deque([0])
 left = None
 right = None
+white_count = 0
 
 # Initialize the drive base.
-robot = DriveBase(motor_left, motor_right, wheel_diameter=55, axle_track=145) #Check for correct Parameter 
+robot = DriveBase(motor_left, motor_right, wheel_diameter=55, axle_track=95) #Check for correct Parameter 
 
 # calculating of rgb to hsv
 # from https://tutorials.aposteriori.com.sg/110-Pybricks-Basics/99-Special-Topics/20-HSV-and-RGB.html
@@ -79,9 +80,9 @@ def proc(num, off):
 
 # calculates allowed range for hsv values
 def procentRange(h,s,v, color_list):
-    procH = proc(color_list[0],0.30) # 25
-    procS = proc(color_list[1],0.35) # 30
-    procV = proc(color_list[2],0.40) # 15
+    procH = proc(color_list[0],0.25) # 25
+    procS = proc(color_list[1],0.30) # 30
+    procV = proc(color_list[2],0.15) # 15
     if (procH[0]<= h <= procH[1]) and (procS[0]<= s <=procS[1]) and (procV[0] <= v <= procV[1]):
         return True
     return False
@@ -95,29 +96,78 @@ def find_color(): #Update sensor readings
         return None, None
     for i in color_list_left:
         if procentRange(h_l,s_l,v_l,i):
+            print("i_l=", i)
             left = i
+            return left, None
+        else:
+            if v_l >=89:
+                print("Left White")
+                left = Color.WHITE
+                right = Color.BLACK
+                return right, left
+            else:
+                left = None
 
     for i in color_list_right:
         if procentRange(h_r,s_r,v_r,i):
+            print("i_r =",i)
             right = i
+            return None, right
+        else:
+            if v_r >=89:
+                print("Right White")
+                right = Color.WHITE
+                left = Color.BLACK
+                return right, left
+            else:
+                right = None
 
+    # if right == None and left == None:
+    #     print('H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
+    #     print(rgb_to_hsv(sensor_right.rgb()))
+    #     print("----------------\n")
+    # elif left == None:
+    #     print('L -> H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
+    # elif right == None:
+    #     print(rgb_to_hsv(sensor_right.rgb()))
+    
+    print("Left: ", left)
+    print("Right: ", right)
     return left,right
 
+def update_front_back():
+    if rounds <= 1:
+        return ultraSonic_front.distance(), ultraSonic_back.distance()
+    else: 
+        return ultraSonic_front.distance(), 0
+    
 def update_sensors(): #Update sensor readings
     global left_array
     global right_array
 
-    color_left, color_right = find_color()
-    left_array.append(color_num(color_left, color_list_left))
-    right_array.append(color_num(color_right, color_list_right))
+    # color_left = find_color()
+    # color_right = find_color()
+    color_left = sensor_left.color()
+    color_right = sensor_right.color()
+    if (color_left == Color.BLUE or color_right == Color.BLUE) or (color_left == Color.YELLOW or color_right == Color.YELLOW): 
+        color_left, color_right = find_color()
+        
+        left_array.append(color_num(color_left, color_list_left))
+        right_array.append(color_num(color_right, color_list_right))
+    else:
+        left_array.append(color_num(color_left, color_list_left))
+        right_array.append(color_num(color_right, color_list_right))
+    
 
-    if len(left_array)>3:
+    if len(left_array)>1:
         left_array.popleft()
-    if len(right_array)>3:
+    if len(right_array)>1:
         right_array.popleft()
     color_left=most_common(left_array)
     color_right=most_common(right_array)
 
+    # print(color_left)
+    # print(right)
     return color_left, color_right
 
 def most_common (array):
@@ -143,121 +193,153 @@ def transition_state(color_left, color_right):
     global state
     global lane_state
     global rounds
+    global white_count
+    allowed_dist = 170
+    front, back = update_front_back()
 
-    # if dist < allowed_dist
-    #   switch lane and lanestate
+    # check for obstacle and change lane
+    if front < allowed_dist:
+        state=STATES[5]
+        return state
+    if back < allowed_dist/2 and rounds != 1: #parking lot
+        print("Should Park")
+        print(back)
+        return STATES[7]
+
+    if front > allowed_dist:
+        #   switch lane and lanestate
+        if left_color == 1 and right_color == 1: # Black
+            return STATES[0] # Move forward
+
+        if left_color == 1 and right_color == 2: # Black / White
+            if lane_state==LANE_STATES[0]:
+                lane_state=LANE_STATES[1]
+            return STATES[3]
+
+        if left_color == 2 and right_color == 1: # White / Black
+            if lane_state==LANE_STATES[0]:
+                lane_state=LANE_STATES[2]
+            return STATES[4]
+        if left_color == 3: # Green
+            if lane_state==LANE_STATES[0]:
+                lane_state=LANE_STATES[1]
+            white_count=0
+            return STATES[4]
+
+        if right_color == 3: # Green
+            if lane_state==LANE_STATES[0]:
+                lane_state=LANE_STATES[2]
+            white_count=0
+            return STATES[3]
+        if left_color == 4 or right_color == 4: #Blue - 3 sec stop
+            print("-------------BLUUUUEE-------------")
+            return STATES[6]
+
+        if left_color == 5 or right_color == 5: #Yellow - slow down 
+            return STATES[2]
     
-
-    if left_color == 1 and right_color == 1: # Black
-        state=STATES[0] # Move forward
-
-    if left_color == 1 and right_color == 2: # Black / White
-        if lane_state==LANE_STATES[0]:
-            lane_state=LANE_STATES[1]
-        state=STATES[3]
-
-    if left_color == 2 and right_color == 1: # White / Black
-        if lane_state==LANE_STATES[0]:
-            lane_state=LANE_STATES[2]
-        state=STATES[4]
-        
-    if left_color == 3: # Green
-        if lane_state==LANE_STATES[0]:
-            lane_state=LANE_STATES[1]
-        state=STATES[4]
-
-    if right_color == 3: # Green
-        if lane_state==LANE_STATES[0]:
-            lane_state=LANE_STATES[2]
-        state=STATES[3]
-
-    if left_color == 4 or right_color == 4: #Blue - 3 sec stop
-        state=STATES[6]
-
-    if left_color == 5 or right_color == 5: #Yellow - slow down 
-        state=STATES[2]
-   
-    if left_color == 6 and right_color == 6: #Red - lane switch
-        rounds=rounds-1
-        # if rounds<1:
-        #     state=STATES[1]
-        #     if rounds==0:
-        #         ev3.speaker.beep(400,100)
-        #         while True:
-        #             Speed = 0
-        #             robot.drive(0,0)
-        else:
-            state=STATES[5]
-
-    if left_color==0 and right_color==0: # None
-        state=STATES[0]
+        if left_color == 6 and right_color == 6: #Red - lane switch
+            rounds=rounds-1
+            # if rounds<1:
+            #     state=STATES[1]
+            #     if rounds==0:
+            #         ev3.speaker.beep(400,100)
+            #         while True:
+            #             Speed = 0
+            #             robot.drive(0,0)
+            # else:
+            #     state=STATES[5]
+        if left_color==0 and right_color==0: # None
+            return STATES[0]
 
 def color_num(color, color_list):
-    if color == None:
-        return 0
-    elif color == color_list[0] or color == color_list[6] or color == color_list[7] or color == color_list[8] or color == color_list[13] or color == color_list[15]or color == color_list[17]or color == color_list[18]: # black
+    # if color == None:
+    #     return 0
+    if color == Color.BLACK: # black
         return 1
-    elif color == color_list[1] or color == color_list[9] or color == color_list[10] or color == color_list[14] or color == color_list[16]: # white 
+    elif color == Color.WHITE : # white 
         return 2
-    elif color == color_list[2] or color == color_list[11]: # green
+    elif color == Color.GREEN: # green
         return 3
-    elif color ==color_list[3]:  # blue
+    elif color == color_list[1]:  # blue
+        print("-------------BLUUUUEE COLOR-------------")
         return 4
-    elif color == color_list[4]: # yellow
+    elif color == color_list[2]: # yellow
+        print("Yellow")
         return 5
-    elif color == color_list[5]: # red
+    elif color == Color.RED : # red
         return 6
     else: 
         return 0
+
 
 #Executes operations depending of the state 
 def switch(state):  
     global rounds
     global Speed
+    global lane_state
+    global white_count
+    front, back = update_front_back()
     if state ==  "DRIVE":
+        if white_count !=0:
+            white_count=white_count-1
         robot.drive(Speed,0)
     elif state ==  "STOP":
         robot.drive(0,0)
     elif state ==  "SLOW":
         robot.drive(Speed/2,0)
         clear_array()
-        wait(300000/Speed)
+        wait(1500)
     elif state ==  "TURN_LEFT":
-        robot.drive(Speed,-60)
+        robot.drive(Speed,50 + white_count)
+        white_count=50
+        wait(50)
     elif state ==  "TURN_RIGHT":
-        robot.drive(Speed,60)
-    elif state ==  "SWITCH_LANE":
+        robot.drive(Speed,-50 - white_count)
+        white_count=50
+        wait(100)
+    elif state ==  "SWITCH_LANE": 
         if lane_state=="LEFT_LANE":
             print("left")
-            Speed=100
-            robot.drive(Speed,60)
-            wait(35000/Speed)# timing needs to be relativ to the speed. (maybe wait(30000/speed)). 30000 is the distance
+            robot.turn(-55)
             robot.drive(Speed,0)
-            wait(150000/Speed)
-
-            clear_lane()
+            wait(1000)
+            robot.turn(30)
+            print("end")
+            lane_state =LANE_STATES[2]
             clear_array()
-            Speed=200
         elif lane_state=="RIGHT_LANE":
             print("right")
-            Speed=100
-            robot.drive(Speed,-60)
-            wait(30000/Speed)
+            robot.turn(55)
             robot.drive(Speed,0)
-            wait(150000/Speed)
-            clear_lane()
+            wait(1000)
+            robot.turn(-30)
+            print("end")
+            lane_state = LANE_STATES[1]
             clear_array()
-            Speed=200
         else:
             print("No lane detected")
-            robot.drive(Speed,45)
+            robot.drive(Speed,-45)
         clear_array()
     elif state == "HOLD":
+        print("-------------BLUUUUEE HOLD-------------")
         robot.drive(0,0)
         wait(3000)
         robot.drive(Speed,0)
         clear_array()
         wait(300)
+    elif state == "PARK":
+        robot.drive(Speed,0)
+        wait(500)
+        robot.turn(-90)
+        while (front > 50):
+            front, back = update_front_back()
+            print(front)
+            robot.drive(Speed, 0)
+        ev3.speaker.beep(500,100)
+        while(True):
+            robot.drive(0,0)
+
 
 def clear_array():
     global left_array
@@ -268,23 +350,24 @@ def clear_array():
 def clear_lane():
     lane_state=LANE_STATES[0]
 
-#main loop of the programm
+#main loop of the 2
 while True:
     start=time.time()
     # Update sensor readings
+    pressed = ev3.buttons.pressed()
     left_color, right_color = update_sensors()
 
     # Handle state transitions
-    transition_state(left_color, right_color)
-    left = None
-    right = None
-    switch(state)
-    pressed = ev3.buttons.pressed() 
+    switch(transition_state(left_color, right_color))
+    # left = None
+    # right = None
+    # print(state)
     if pressed:
         print("reset")
         state=STATES[1]
         lane_state=LANE_STATES[0]
         rounds=1
-        Speed=200
+        Speed=-150
         ev3.speaker.beep(500,100)
         pressed=False
+    # print(time.time()-start)

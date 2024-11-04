@@ -22,8 +22,8 @@ sensor_right= ColorSensor(Port.S4)
 ultraSonic_front = UltrasonicSensor(Port.S2)
 ultraSonic_back = UltrasonicSensor(Port.S3)
 
-color_list_left = [(205,28,100),(211, 78, 65),(63,65,69)] # 0=White, 1=Blue, 2=Yellow
-color_list_right = [(205,28,100),(205,84,44),(86,70,55)] # 0=White, 1=Blue, 2=Yellow
+color_list_left = [(205,28,100),(211, 78, 65),(63,65,69),(120,16,77)] # 0+4=White, 1=Blue, 2=Yellow
+color_list_right = [(205,28,100),(205,84,44),(86,70,55),(205,28,100)] # 0+4=White, 1=Blue, 2=Yellow
 
 STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD", "PARK"] #All possible states the robot can have 
 LANE_STATES=["UNKNOWN","LEFT_LANE","RIGHT_LANE"]
@@ -100,12 +100,6 @@ def find_color(): #Update sensor readings
             left = i
             return left, None
         else:
-            # if v_l >=50:
-            #     print("Left White")
-            #     left = Color.WHITE
-            #     right = Color.BLACK
-            #     return right, left
-            # else:
             left = None
 
     for i in color_list_right:
@@ -114,12 +108,6 @@ def find_color(): #Update sensor readings
             right = i
             return None, right
         else:
-            # if v_r >=50:
-            #     print("Right White")
-            #     right = Color.WHITE
-            #     left = Color.BLACK
-            #     return right, left
-            # else:
             right = None
 
     if right == None and left == None:
@@ -214,15 +202,11 @@ def transition_state(color_left, color_right):
         if (left_color == 1 and right_color == 2 ): # Black / White
             if lane_state==LANE_STATES[0]:
                 lane_state=LANE_STATES[1]
-            # if lane_state==LANE_STATES[2]:
-            #     return STATES[4]
             return STATES[3]
 
         if (left_color == 2 and right_color == 1) or (left_color == 2): # White / Black
             if lane_state==LANE_STATES[0]:
                 lane_state=LANE_STATES[2]
-            # if lane_state==LANE_STATES[1]:
-            #     return STATES[3]
             return STATES[4]
         if left_color == 3: # Green
             if lane_state==LANE_STATES[0]:
@@ -248,11 +232,9 @@ def transition_state(color_left, color_right):
             return STATES[0]
 
 def color_num(color, color_list):
-    # if color == None:
-    #     return 0
     if color == Color.BLACK: # black
         return 1
-    elif color == Color.WHITE or color == color_list[0]: # white 
+    elif color == Color.WHITE or color == color_list[0]or color == color_list[3]: # white 
         return 2
     elif color == Color.GREEN: # green
         return 3
@@ -273,7 +255,7 @@ def switch(state):
     global white_count
     front, back = update_front_back()
     if state ==  "DRIVE":
-        if white_count !=0:
+        if white_count !=0: # makes car turn at a angle depending on the amount of whites
             white_count=white_count-1
         robot.drive(Speed,0)
     elif state ==  "STOP":
@@ -283,7 +265,7 @@ def switch(state):
         clear_array()
         wait(2000)
     elif state ==  "TURN_LEFT":
-        robot.drive(Speed,30 + white_count)
+        robot.drive(Speed,30 + white_count) 
         white_count=50
         wait(50)
     elif state ==  "TURN_RIGHT":
@@ -293,7 +275,7 @@ def switch(state):
     elif state ==  "SWITCH_LANE": 
         if lane_state=="LEFT_LANE":
             print("left")
-            robot.drive(Speed,-90)
+            robot.drive(Speed,-70)
             wait(700)
             robot.drive(Speed,0)
             wait(700)
@@ -327,7 +309,7 @@ def switch(state):
         robot.drive(Speed,0)
         wait(500)
         robot.turn(-100)
-        while (front > 80):
+        while (front > 70):
             front, back = update_front_back()
             robot.drive(Speed, 0)
         robot.turn(100)
@@ -338,7 +320,7 @@ def switch(state):
         while(True):
             robot.drive(0,0)
 
-
+# clear most common array
 def clear_array():
     global left_array
     global right_array
@@ -357,8 +339,6 @@ while True:
 
     # Handle state transitions
     switch(transition_state(left_color, right_color))
-    # left = None
-    # right = None
     # print(state)
     if pressed:
         print("reset")

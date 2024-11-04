@@ -22,8 +22,8 @@ sensor_right= ColorSensor(Port.S4)
 ultraSonic_front = UltrasonicSensor(Port.S2)
 ultraSonic_back = UltrasonicSensor(Port.S3)
 
-color_list_left = [(205,28,100),(211, 78, 65),(63,65,69)] # 0+6=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-color_list_right = [(205,28,100),(205,84,44),(86,70,55)] # 0+6=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_left = [(205,28,100),(211, 78, 65),(63,65,69)] # 0=White, 1=Blue, 2=Yellow
+color_list_right = [(205,28,100),(205,84,44),(86,70,55)] # 0=White, 1=Blue, 2=Yellow
 
 STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD", "PARK"] #All possible states the robot can have 
 LANE_STATES=["UNKNOWN","LEFT_LANE","RIGHT_LANE"]
@@ -201,7 +201,7 @@ def transition_state(color_left, color_right):
     if front < allowed_dist:
         state=STATES[5]
         return state
-    if back < allowed_dist/2 and rounds != 1: #parking lot
+    if back < allowed_dist and rounds != 1: #parking lot
         print("Should Park")
         print(back)
         return STATES[7]
@@ -211,14 +211,18 @@ def transition_state(color_left, color_right):
         if left_color == 1 and right_color == 1: # Black
             return STATES[0] # Move forward
 
-        if left_color == 1 and right_color == 2: # Black / White
+        if (left_color == 1 and right_color == 2 ): # Black / White
             if lane_state==LANE_STATES[0]:
                 lane_state=LANE_STATES[1]
+            # if lane_state==LANE_STATES[2]:
+            #     return STATES[4]
             return STATES[3]
 
         if (left_color == 2 and right_color == 1) or (left_color == 2): # White / Black
             if lane_state==LANE_STATES[0]:
                 lane_state=LANE_STATES[2]
+            # if lane_state==LANE_STATES[1]:
+            #     return STATES[3]
             return STATES[4]
         if left_color == 3: # Green
             if lane_state==LANE_STATES[0]:
@@ -277,7 +281,7 @@ def switch(state):
     elif state ==  "SLOW":
         robot.drive(Speed/2,0)
         clear_array()
-        wait(1500)
+        wait(1800)
     elif state ==  "TURN_LEFT":
         robot.drive(Speed,30 + white_count)
         white_count=50
@@ -317,12 +321,16 @@ def switch(state):
         wait(300)
     elif state == "PARK":
         robot.drive(Speed,0)
-        wait(700)
+        wait(500)
         robot.turn(-90)
+        while (front > 80):
+            front, back = update_front_back()
+            robot.drive(Speed, 0)
+        robot.turn(90)
+        ev3.speaker.beep(500,100)
         while (front > 50):
             front, back = update_front_back()
             robot.drive(Speed, 0)
-        ev3.speaker.beep(500,100)
         while(True):
             robot.drive(0,0)
 

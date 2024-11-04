@@ -281,31 +281,35 @@ def switch(state):
     elif state ==  "SLOW":
         robot.drive(Speed/2,0)
         clear_array()
-        wait(1800)
+        wait(2000)
     elif state ==  "TURN_LEFT":
         robot.drive(Speed,30 + white_count)
         white_count=50
         wait(50)
     elif state ==  "TURN_RIGHT":
         robot.drive(Speed,-30 - white_count)
-        white_count=50
+        white_count=70
         wait(50)
     elif state ==  "SWITCH_LANE": 
         if lane_state=="LEFT_LANE":
             print("left")
-            robot.turn(-55)
+            robot.drive(Speed,-90)
+            wait(700)
             robot.drive(Speed,0)
-            wait(1000)
-            robot.turn(30)
+            wait(700)
+            robot.drive(Speed,90)
+            wait(300)
             print("end")
             lane_state =LANE_STATES[2]
             clear_array()
         elif lane_state=="RIGHT_LANE":
             print("right")
-            robot.turn(55)
+            robot.drive(Speed,70)
+            wait(700)
             robot.drive(Speed,0)
-            wait(1000)
-            robot.turn(-30)
+            wait(500)
+            robot.drive(Speed,-90)
+            wait(300)
             print("end")
             lane_state = LANE_STATES[1]
             clear_array()
@@ -322,11 +326,11 @@ def switch(state):
     elif state == "PARK":
         robot.drive(Speed,0)
         wait(500)
-        robot.turn(-90)
+        robot.turn(-100)
         while (front > 80):
             front, back = update_front_back()
             robot.drive(Speed, 0)
-        robot.turn(90)
+        robot.turn(100)
         ev3.speaker.beep(500,100)
         while (front > 50):
             front, back = update_front_back()

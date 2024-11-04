@@ -22,8 +22,8 @@ sensor_right= ColorSensor(Port.S4)
 ultraSonic_front = UltrasonicSensor(Port.S2)
 ultraSonic_back = UltrasonicSensor(Port.S3)
 
-color_list_left = [(0,0,0),(211, 78, 65),(63,65,69)] # 0+6=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
-color_list_right = [(0,0,0),(205,84,44),(86,70,55)] # 0+6=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_left = [(205,28,100),(211, 78, 65),(63,65,69)] # 0+6=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
+color_list_right = [(205,28,100),(205,84,44),(86,70,55)] # 0+6=BLACK, 1=WHITE, 2=GREEN, 3=BLUE, 4=YELLOW, 5=RED
 
 STATES=["DRIVE","STOP","SLOW","TURN_LEFT","TURN_RIGHT","SWITCH_LANE","HOLD", "PARK"] #All possible states the robot can have 
 LANE_STATES=["UNKNOWN","LEFT_LANE","RIGHT_LANE"]
@@ -100,13 +100,13 @@ def find_color(): #Update sensor readings
             left = i
             return left, None
         else:
-            if v_l >=84:
-                print("Left White")
-                left = Color.WHITE
-                right = Color.BLACK
-                return right, left
-            else:
-                left = None
+            # if v_l >=50:
+            #     print("Left White")
+            #     left = Color.WHITE
+            #     right = Color.BLACK
+            #     return right, left
+            # else:
+            left = None
 
     for i in color_list_right:
         if procentRange(h_r,s_r,v_r,i):
@@ -114,13 +114,13 @@ def find_color(): #Update sensor readings
             right = i
             return None, right
         else:
-            if v_r >=84:
-                print("Right White")
-                right = Color.WHITE
-                left = Color.BLACK
-                return right, left
-            else:
-                right = None
+            # if v_r >=50:
+            #     print("Right White")
+            #     right = Color.WHITE
+            #     left = Color.BLACK
+            #     return right, left
+            # else:
+            right = None
 
     if right == None and left == None:
         print('H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
@@ -216,7 +216,7 @@ def transition_state(color_left, color_right):
                 lane_state=LANE_STATES[1]
             return STATES[3]
 
-        if left_color == 2 and right_color == 1: # White / Black
+        if (left_color == 2 and right_color == 1) or (left_color == 2): # White / Black
             if lane_state==LANE_STATES[0]:
                 lane_state=LANE_STATES[2]
             return STATES[4]
@@ -248,7 +248,7 @@ def color_num(color, color_list):
     #     return 0
     if color == Color.BLACK: # black
         return 1
-    elif color == Color.WHITE : # white 
+    elif color == Color.WHITE or color == color_list[0]: # white 
         return 2
     elif color == Color.GREEN: # green
         return 3
@@ -285,7 +285,7 @@ def switch(state):
     elif state ==  "TURN_RIGHT":
         robot.drive(Speed,-30 - white_count)
         white_count=50
-        wait(100)
+        wait(50)
     elif state ==  "SWITCH_LANE": 
         if lane_state=="LEFT_LANE":
             print("left")
@@ -317,11 +317,10 @@ def switch(state):
         wait(300)
     elif state == "PARK":
         robot.drive(Speed,0)
-        wait(500)
+        wait(700)
         robot.turn(-90)
         while (front > 50):
             front, back = update_front_back()
-            print(front)
             robot.drive(Speed, 0)
         ev3.speaker.beep(500,100)
         while(True):

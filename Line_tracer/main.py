@@ -100,7 +100,7 @@ def find_color(): #Update sensor readings
             left = i
             return left, None
         else:
-            if v_l >=89:
+            if v_l >=84:
                 print("Left White")
                 left = Color.WHITE
                 right = Color.BLACK
@@ -114,7 +114,7 @@ def find_color(): #Update sensor readings
             right = i
             return None, right
         else:
-            if v_r >=89:
+            if v_r >=84:
                 print("Right White")
                 right = Color.WHITE
                 left = Color.BLACK
@@ -122,17 +122,17 @@ def find_color(): #Update sensor readings
             else:
                 right = None
 
-    # if right == None and left == None:
-    #     print('H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
-    #     print(rgb_to_hsv(sensor_right.rgb()))
-    #     print("----------------\n")
-    # elif left == None:
-    #     print('L -> H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
-    # elif right == None:
-    #     print(rgb_to_hsv(sensor_right.rgb()))
+    if right == None and left == None:
+        print('H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
+        print(rgb_to_hsv(sensor_right.rgb()))
+        print("----------------\n")
+    elif left == None:
+        print('L -> H: {0}\t S: {1}\t V: {2}'.format(h_l, s_l, v_l))
+    elif right == None:
+        print(rgb_to_hsv(sensor_right.rgb()))
     
-    print("Left: ", left)
-    print("Right: ", right)
+    # print("Left: ", left)
+    # print("Right: ", right)
     return left,right
 
 def update_front_back():
@@ -232,7 +232,6 @@ def transition_state(color_left, color_right):
             white_count=0
             return STATES[3]
         if left_color == 4 or right_color == 4: #Blue - 3 sec stop
-            print("-------------BLUUUUEE-------------")
             return STATES[6]
 
         if left_color == 5 or right_color == 5: #Yellow - slow down 
@@ -240,15 +239,7 @@ def transition_state(color_left, color_right):
     
         if left_color == 6 and right_color == 6: #Red - lane switch
             rounds=rounds-1
-            # if rounds<1:
-            #     state=STATES[1]
-            #     if rounds==0:
-            #         ev3.speaker.beep(400,100)
-            #         while True:
-            #             Speed = 0
-            #             robot.drive(0,0)
-            # else:
-            #     state=STATES[5]
+
         if left_color==0 and right_color==0: # None
             return STATES[0]
 
@@ -262,16 +253,13 @@ def color_num(color, color_list):
     elif color == Color.GREEN: # green
         return 3
     elif color == color_list[1]:  # blue
-        print("-------------BLUUUUEE COLOR-------------")
         return 4
     elif color == color_list[2]: # yellow
-        print("Yellow")
         return 5
     elif color == Color.RED : # red
         return 6
     else: 
         return 0
-
 
 #Executes operations depending of the state 
 def switch(state):  
@@ -291,11 +279,11 @@ def switch(state):
         clear_array()
         wait(1500)
     elif state ==  "TURN_LEFT":
-        robot.drive(Speed,50 + white_count)
+        robot.drive(Speed,30 + white_count)
         white_count=50
         wait(50)
     elif state ==  "TURN_RIGHT":
-        robot.drive(Speed,-50 - white_count)
+        robot.drive(Speed,-30 - white_count)
         white_count=50
         wait(100)
     elif state ==  "SWITCH_LANE": 
@@ -322,7 +310,6 @@ def switch(state):
             robot.drive(Speed,-45)
         clear_array()
     elif state == "HOLD":
-        print("-------------BLUUUUEE HOLD-------------")
         robot.drive(0,0)
         wait(3000)
         robot.drive(Speed,0)

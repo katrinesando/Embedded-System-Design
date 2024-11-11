@@ -234,7 +234,7 @@ def transition_state(color_left, color_right):
 def color_num(color, color_list):
     if color == Color.BLACK: # black
         return 1
-    elif color == Color.WHITE or color == color_list[0]or color == color_list[3]: # white 
+    elif color == Color.WHITE or color == color_list[0] or color == color_list[3]: # white 
         return 2
     elif color == Color.GREEN: # green
         return 3
